@@ -1,4 +1,4 @@
-import { EventItem, BlogPost, CaseStudy } from './types';
+import type { EventItem, BlogPost, CaseStudy } from './types';
 
 export const INITIAL_EVENTS: EventItem[] = [
   {

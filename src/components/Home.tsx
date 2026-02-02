@@ -9,7 +9,7 @@ import CaseStudies from './CaseStudies';
 import ContentHub from './ContentHub';
 import About from './About';
 import Contact from './Contact';
-import { EventItem, BlogPost } from '../types';
+import type { EventItem, BlogPost } from '../types';
 
 interface HomeProps {
   onNavigate: (page: string, id?: number) => void;

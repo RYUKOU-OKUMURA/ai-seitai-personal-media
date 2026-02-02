@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { EventItem } from '../types';
+import type { EventItem } from '../types';
 
 interface EventBoardProps {
   events: EventItem[];

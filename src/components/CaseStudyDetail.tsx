@@ -1,5 +1,5 @@
 import React from 'react';
-import { CaseStudy } from '../types';
+import type { CaseStudy } from '../types';
 
 interface CaseStudyDetailProps {
   id: number;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { EventItem, BlogPost } from '../types';
+import type { EventItem, BlogPost } from '../types';
 
 interface AdminDashboardProps {
   events: EventItem[];

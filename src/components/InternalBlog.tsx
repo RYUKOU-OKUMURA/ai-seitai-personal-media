@@ -1,5 +1,5 @@
 import React from 'react';
-import { BlogPost } from '../types';
+import type { BlogPost } from '../types';
 
 interface InternalBlogProps {
   posts: BlogPost[];

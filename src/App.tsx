@@ -10,7 +10,7 @@ import AdminDashboard from './components/AdminDashboard';
 import Footer from './components/Footer';
 
 // Data Types
-import { EventItem, BlogPost } from './types';
+import type { EventItem, BlogPost } from './types';
 import { INITIAL_EVENTS, INITIAL_BLOG_POSTS, INITIAL_CASE_STUDIES } from './initialData';
 
 const App: React.FC = () => {
