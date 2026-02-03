@@ -2,11 +2,9 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# BOSS Personal Media
 
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/drive/1VYMLRs4Q7C_HBTYcW-wo-sZRwR1MPgID
+Astro + React + Tailwind のサイトです。ブログ/イベントは **Astro Content Collections**（`src/content/**`）で管理し、`/admin` から投稿すると GitHub にコミットされます。
 
 ## Run Locally
 
@@ -15,6 +13,16 @@ View your app in AI Studio: https://ai.studio/apps/drive/1VYMLRs4Q7C_HBTYcW-wo-s
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. Create `.env.local` (see `.env.example`) and set:
+   - `ADMIN_PASSWORD` (管理画面ログイン用)
+   - `GITHUB_TOKEN` (GitHub Contents API: contents read/write)
+   - optional: `GITHUB_REPO`, `GITHUB_BRANCH`
 3. Run the app:
    `npm run dev`
+
+## URLs
+
+- Public site: `/`
+- Blog list: `/blog`
+- Blog detail: `/blog/{slug}`
+- Admin (CMS): `/admin`

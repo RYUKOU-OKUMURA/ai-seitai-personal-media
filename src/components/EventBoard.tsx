@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
-import type { EventItem } from '../types';
+import type { EventListItem } from '../types';
 
 interface EventBoardProps {
-  events: EventItem[];
+  events: EventListItem[];
 }
 
 const EventBoard: React.FC<EventBoardProps> = ({ events }) => {
@@ -57,7 +57,7 @@ const EventBoard: React.FC<EventBoardProps> = ({ events }) => {
           >
             {events.map((event) => (
               <a 
-                key={event.id} 
+                key={event.slug}
                 href={event.link}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -83,7 +83,7 @@ const EventBoard: React.FC<EventBoardProps> = ({ events }) => {
                 <div className="space-y-2">
                   <p className="text-primary font-bold text-sm flex items-center gap-1">
                     <span className="material-symbols-outlined text-base">calendar_month</span>
-                    {event.date}
+                    {event.dateLabel}
                   </p>
                   <h3 className="font-bold text-[#111418] text-lg leading-snug group-hover:text-primary transition-colors line-clamp-2">
                     {event.title}

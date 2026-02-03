@@ -1,11 +1,17 @@
 import React from 'react';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
+import type { BlogPostListItem, EventListItem } from './types';
 
-const AppRoot: React.FC = () => {
+interface AppRootProps {
+  events: EventListItem[];
+  posts: BlogPostListItem[];
+}
+
+const AppRoot: React.FC<AppRootProps> = ({ events, posts }) => {
   return (
     <ErrorBoundary>
-      <App />
+      <App events={events} posts={posts} />
     </ErrorBoundary>
   );
 };

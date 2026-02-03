@@ -1,12 +1,20 @@
 import React from 'react';
-import type { BlogPost } from '../types';
+import type { BlogPostListItem } from '../types';
 
 interface InternalBlogProps {
-  posts: BlogPost[];
-  onNavigate: (page: string, id?: number) => void;
+  posts: BlogPostListItem[];
 }
 
-const InternalBlog: React.FC<InternalBlogProps> = ({ posts, onNavigate }) => {
+const formatDate = (iso: string) => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(date.getUTCDate()).padStart(2, '0');
+  return `${y}.${m}.${d}`;
+};
+
+const InternalBlog: React.FC<InternalBlogProps> = ({ posts }) => {
   return (
     <section className="py-24 bg-background-light" id="blog">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,12 +24,12 @@ const InternalBlog: React.FC<InternalBlogProps> = ({ posts, onNavigate }) => {
             <h2 className="text-3xl font-black text-[#111418]">院長コラム・ブログ</h2>
             <p className="text-gray-600 mt-2">日々の気づきや、AI活用の裏話などを更新しています。</p>
           </div>
-          <button 
-            onClick={() => onNavigate('blog-list')} 
+          <a
+            href="/blog"
             className="text-gray-500 font-medium hover:text-primary flex items-center gap-1 transition-colors"
           >
             記事一覧を見る <span className="material-symbols-outlined">arrow_right_alt</span>
-          </button>
+          </a>
         </div>
 
         {posts.length === 0 ? (
@@ -31,10 +39,10 @@ const InternalBlog: React.FC<InternalBlogProps> = ({ posts, onNavigate }) => {
         ) : (
           <div className="grid md:grid-cols-3 gap-8">
             {posts.slice(0, 3).map((post) => (
-              <article 
-                key={post.id} 
+              <a
+                key={post.slug}
+                href={`/blog/${post.slug}`}
                 className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group cursor-pointer flex flex-col h-full"
-                onClick={() => onNavigate('blog-detail', post.id)}
               >
                 <div className="aspect-video overflow-hidden relative bg-gray-100">
                   <img 
@@ -52,7 +60,7 @@ const InternalBlog: React.FC<InternalBlogProps> = ({ posts, onNavigate }) => {
                 <div className="p-6 flex flex-col flex-grow">
                   <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
                     <span className="material-symbols-outlined text-sm">schedule</span>
-                    {post.date}
+                    {formatDate(post.publishedAt)}
                   </div>
                   <h3 className="text-lg font-bold text-[#111418] mb-3 leading-snug group-hover:text-primary transition-colors line-clamp-2">
                     {post.title}
@@ -64,7 +72,7 @@ const InternalBlog: React.FC<InternalBlogProps> = ({ posts, onNavigate }) => {
                     続きを読む <span className="material-symbols-outlined text-sm">arrow_forward</span>
                   </div>
                 </div>
-              </article>
+              </a>
             ))}
           </div>
         )}

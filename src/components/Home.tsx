@@ -9,12 +9,12 @@ import CaseStudies from './CaseStudies';
 import ContentHub from './ContentHub';
 import About from './About';
 import Contact from './Contact';
-import type { EventItem, BlogPost } from '../types';
+import type { BlogPostListItem, EventListItem } from '../types';
 
 interface HomeProps {
   onNavigate: (page: string, id?: number) => void;
-  events: EventItem[];
-  posts: BlogPost[];
+  events: EventListItem[];
+  posts: BlogPostListItem[];
 }
 
 const Home: React.FC<HomeProps> = ({ onNavigate, events, posts }) => {
@@ -25,7 +25,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, events, posts }) => {
       <Philosophy />
       <Services onNavigate={onNavigate} />
       <EventBoard events={events} />
-      <InternalBlog posts={posts} onNavigate={onNavigate} />
+      <InternalBlog posts={posts} />
       <ContentHub />
       <CaseStudies onNavigate={onNavigate} />
       <About />

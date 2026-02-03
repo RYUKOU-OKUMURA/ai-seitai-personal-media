@@ -35,12 +35,9 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         </div>
         <div className="border-t border-gray-800 mt-10 pt-6 flex justify-between text-sm text-gray-500">
           <span>© 2023 BOSS Personal Media. All rights reserved.</span>
-          <span 
-            className="cursor-pointer hover:text-gray-300 opacity-50" 
-            onClick={() => onNavigate && onNavigate('admin')}
-          >
+          <a className="cursor-pointer hover:text-gray-300 opacity-50" href="/admin">
             Admin Login
-          </span>
+          </a>
         </div>
       </div>
     </footer>

@@ -1,20 +1,28 @@
-export interface EventItem {
-  id: number;
+export interface EventListItem {
+  slug: string;
   title: string;
-  date: string;
+  dateLabel: string;
   image: string;
   tag: string;
   link: string;
 }
 
-export interface BlogPost {
-  id: number;
+export interface EventEditable extends EventListItem {
+  draft: boolean;
+}
+
+export interface BlogPostListItem {
+  slug: string;
   title: string;
-  date: string;
+  publishedAt: string; // ISO string
   category: string;
   image: string;
   excerpt: string;
-  content?: string;
+}
+
+export interface BlogPostEditable extends BlogPostListItem {
+  content: string;
+  draft: boolean;
 }
 
 export interface CaseStudy {
