@@ -2,32 +2,39 @@
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import AdminDashboard from '../../components/AdminDashboard';
+import { getSessionFromRequest } from '../../server/session';
 
-const events = (await getCollection('events')).map((event) => ({
-	slug: event.slug,
-	title: event.data.title,
-	dateLabel: event.data.dateLabel,
-	image: event.data.image,
-	tag: event.data.tag,
-	link: event.data.link,
-	draft: event.data.draft,
-}));
+const user = await getSessionFromRequest(Astro.request);
+const isAuthenticated = Boolean(user);
 
-const posts = (await getCollection('blog'))
-	.sort((a, b) => (a.data.publishedAt < b.data.publishedAt ? 1 : -1))
-	.map((post) => ({
-		slug: post.slug,
-		title: post.data.title,
-		publishedAt: post.data.publishedAt,
-		category: post.data.category,
-		image: post.data.image,
-		excerpt: post.data.excerpt,
-		content: post.body,
-		draft: post.data.draft,
-	}));
+const events = isAuthenticated
+	? (await getCollection('events')).map((event) => ({
+			slug: event.slug,
+			title: event.data.title,
+			dateLabel: event.data.dateLabel,
+			image: event.data.image,
+			tag: event.data.tag,
+			link: event.data.link,
+			draft: event.data.draft,
+		}))
+	: [];
+
+const posts = isAuthenticated
+	? (await getCollection('blog'))
+			.sort((a, b) => (a.data.publishedAt < b.data.publishedAt ? 1 : -1))
+			.map((post) => ({
+				slug: post.slug,
+				title: post.data.title,
+				publishedAt: post.data.publishedAt,
+				category: post.data.category,
+				image: post.data.image,
+				excerpt: post.data.excerpt,
+				content: post.body,
+				draft: post.data.draft,
+			}))
+	: [];
 ---
 
 <Layout title="管理画面 | BOSS Personal Media">
 	<AdminDashboard client:only="react" events={events} posts={posts} />
 </Layout>
-

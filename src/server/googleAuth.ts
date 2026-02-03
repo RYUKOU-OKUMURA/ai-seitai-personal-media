@@ -86,10 +86,17 @@ export const getUserInfo = async (accessToken: string): Promise<GoogleUserInfo> 
 };
 
 export const isAllowedEmail = (email: string): boolean => {
-	const allowedEmails = import.meta.env.ALLOWED_EMAILS?.split(',').map((e) => e.trim()) || [];
+	const raw = import.meta.env.ALLOWED_EMAILS;
+	if (!raw) {
+		throw new Error('ALLOWED_EMAILS must be configured');
+	}
+
+	const allowedEmails = raw
+		.split(',')
+		.map((e) => e.trim())
+		.filter(Boolean);
 	if (allowedEmails.length === 0) {
-		console.warn('ALLOWED_EMAILS is not configured. Allowing all emails.');
-		return true;
+		throw new Error('ALLOWED_EMAILS must include at least one email');
 	}
 	return allowedEmails.includes(email);
 };
