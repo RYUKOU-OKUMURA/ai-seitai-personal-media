@@ -8,15 +8,5 @@ export const requireAdmin = async (request: Request): Promise<Response | null> =
 		return null; // 認証成功
 	}
 
-	// 後方互換性のため、パスワード認証もサポート
-	const expected = import.meta.env.ADMIN_PASSWORD;
-	if (expected) {
-		const provided = request.headers.get('x-admin-password') ?? '';
-		if (provided === expected) {
-			return null; // 認証成功
-		}
-	}
-
 	return json({ error: 'Unauthorized' }, { status: 401 });
 };
-

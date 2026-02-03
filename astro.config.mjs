@@ -15,5 +15,9 @@ try {
 export default defineConfig({
 	output: 'server',
 	adapter,
+	markdown: {
+		// Prevent raw HTML in Markdown to reduce XSS risk.
+		remarkRehype: { allowDangerousHtml: false },
+	},
 	integrations: [react(), tailwind()],
 });

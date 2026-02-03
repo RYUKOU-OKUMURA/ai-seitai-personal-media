@@ -24,9 +24,7 @@ export const getGoogleAuthUrl = (state?: string): string => {
 		client_id: config.clientId,
 		redirect_uri: config.redirectUri,
 		response_type: 'code',
-		scope: 'openid email profile https://www.googleapis.com/auth/gmail.send',
-		access_type: 'offline',
-		prompt: 'consent',
+		scope: 'openid email profile',
 		...(state ? { state } : {}),
 	});
 
