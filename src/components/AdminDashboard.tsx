@@ -6,7 +6,11 @@ interface AdminDashboardProps {
   posts: BlogPostEditable[];
 }
 
-const PASSWORD_KEY = 'boss_admin_password';
+type SessionUser = {
+  email: string;
+  name: string;
+  picture?: string;
+};
 
 const isoToDateInput = (iso: string) => {
   const date = new Date(iso);
@@ -33,8 +37,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ events: initialEvents, 
   const [events, setEvents] = useState<EventEditable[]>(initialEvents);
   const [posts, setPosts] = useState<BlogPostEditable[]>(initialPosts);
 
-  const [passwordInput, setPasswordInput] = useState('');
-  const [sessionPassword, setSessionPassword] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<SessionUser | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -45,14 +48,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ events: initialEvents, 
   const [editingPostOriginalSlug, setEditingPostOriginalSlug] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = sessionStorage.getItem(PASSWORD_KEY);
-    if (saved) setSessionPassword(saved);
+    // ユーザー情報を取得
+    fetch('/api/auth/me')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) setCurrentUser(data.user);
+      })
+      .catch(console.error);
   }, []);
-
-  const authHeaders = useMemo(() => {
-    if (!sessionPassword) return {};
-    return { 'x-admin-password': sessionPassword };
-  }, [sessionPassword]);
 
   const api = async <T,>(input: string, init: RequestInit): Promise<T> => {
     const res = await fetch(input, {
@@ -60,8 +63,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ events: initialEvents, 
       headers: {
         'Content-Type': 'application/json',
         ...(init.headers ?? {}),
-        ...authHeaders,
       },
+      credentials: 'include', // Cookieを含める
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
@@ -71,18 +74,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ events: initialEvents, 
     return data as T;
   };
 
-  const login = async () => {
+  const login = () => {
+    // Googleログインページにリダイレクト
+    window.location.href = '/api/auth/login';
+  };
+
+  const logout = async () => {
     setBusy(true);
-    setNotice(null);
     try {
-      const candidate = passwordInput.trim();
-      if (!candidate) throw new Error('パスワードを入力してください');
-      const res = await fetch('/api/admin/ping', { headers: { 'x-admin-password': candidate } });
-      if (!res.ok) throw new Error('パスワードが違うか、サーバー設定が未完了です');
-      sessionStorage.setItem(PASSWORD_KEY, candidate);
-      setSessionPassword(candidate);
-      setPasswordInput('');
-      setNotice('ログインしました');
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      setCurrentUser(null);
+      setNotice('ログアウトしました');
     } catch (err) {
       setNotice(err instanceof Error ? err.message : String(err));
     } finally {
@@ -90,16 +92,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ events: initialEvents, 
     }
   };
 
-  const logout = () => {
-    sessionStorage.removeItem(PASSWORD_KEY);
-    setSessionPassword(null);
-    setNotice('ログアウトしました');
-  };
-
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingEvent) return;
-    if (!sessionPassword) return setNotice('先にログインしてください');
+    if (!currentUser) return setNotice('先にログインしてください');
 
     setBusy(true);
     setNotice(null);
@@ -132,7 +128,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ events: initialEvents, 
   };
 
   const handleDeleteEvent = async (slug: string) => {
-    if (!sessionPassword) return setNotice('先にログインしてください');
+    if (!currentUser) return setNotice('先にログインしてください');
     if (!confirm('本当に削除しますか？')) return;
     setBusy(true);
     setNotice(null);
@@ -150,7 +146,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ events: initialEvents, 
   const handleSavePost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingPost) return;
-    if (!sessionPassword) return setNotice('先にログインしてください');
+    if (!currentUser) return setNotice('先にログインしてください');
 
     setBusy(true);
     setNotice(null);
@@ -181,7 +177,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ events: initialEvents, 
   };
 
   const handleDeletePost = async (slug: string) => {
-    if (!sessionPassword) return setNotice('先にログインしてください');
+    if (!currentUser) return setNotice('先にログインしてください');
     if (!confirm('本当に削除しますか？')) return;
     setBusy(true);
     setNotice(null);
@@ -210,9 +206,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ events: initialEvents, 
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-          {sessionPassword ? (
+          {currentUser ? (
             <>
-              <div className="text-xs text-gray-300">ログイン中</div>
+              <div className="flex items-center gap-2 text-xs text-gray-300">
+                {currentUser.picture && (
+                  <img src={currentUser.picture} alt={currentUser.name} className="w-6 h-6 rounded-full" />
+                )}
+                <span>{currentUser.name}</span>
+              </div>
               <button
                 type="button"
                 onClick={logout}
@@ -230,21 +231,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ events: initialEvents, 
             </>
           ) : (
             <>
-              <input
-                className="w-full sm:w-72 rounded bg-white/10 border border-white/20 px-3 py-2 text-sm outline-none focus:border-white/40"
-                placeholder="管理パスワード"
-                type="password"
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                disabled={busy}
-              />
               <button
                 type="button"
                 onClick={login}
-                className="text-sm bg-primary hover:bg-blue-600 px-4 py-2 rounded font-bold transition-colors disabled:opacity-60"
+                className="text-sm bg-white text-[#111418] hover:bg-gray-100 px-4 py-2 rounded font-bold transition-colors disabled:opacity-60 flex items-center gap-2"
                 disabled={busy}
               >
-                ログイン
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Googleでログイン
               </button>
             </>
           )}

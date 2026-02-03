@@ -8,7 +8,7 @@ import { assertSafeSlug } from '../../../../server/slug';
 export const prerender = false;
 
 export const PUT: APIRoute = async ({ params, request }) => {
-	const auth = requireAdmin(request);
+	const auth = await requireAdmin(request);
 	if (auth) return auth;
 
 	try {
@@ -41,7 +41,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
 };
 
 export const DELETE: APIRoute = async ({ params, request }) => {
-	const auth = requireAdmin(request);
+	const auth = await requireAdmin(request);
 	if (auth) return auth;
 
 	try {

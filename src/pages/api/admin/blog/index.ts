@@ -8,7 +8,7 @@ import { buildBlogMarkdown } from '../../../../server/markdown';
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
-	const auth = requireAdmin(request);
+	const auth = await requireAdmin(request);
 	if (auth) return auth;
 
 	try {

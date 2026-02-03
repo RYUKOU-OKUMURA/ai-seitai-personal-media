@@ -7,13 +7,13 @@ type RepoConfig = {
 };
 
 const getRepoConfig = (): RepoConfig => {
-	const token = process.env.GITHUB_TOKEN;
+	const token = import.meta.env.GITHUB_TOKEN;
 	if (!token) throw new Error('GITHUB_TOKEN is not configured on the server');
 
 	return {
 		token,
-		repo: process.env.GITHUB_REPO ?? 'RYUKOU-OKUMURA/ai-seitai-personal-media',
-		branch: process.env.GITHUB_BRANCH ?? 'main',
+		repo: import.meta.env.GITHUB_REPO ?? 'RYUKOU-OKUMURA/ai-seitai-personal-media',
+		branch: import.meta.env.GITHUB_BRANCH ?? 'main',
 	};
 };
 
