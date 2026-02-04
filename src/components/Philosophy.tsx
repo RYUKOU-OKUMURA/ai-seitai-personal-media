@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const Philosophy: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <section className="py-24 bg-white relative overflow-hidden" id="philosophy">
       {/* Background decoration */}
@@ -12,33 +14,102 @@ const Philosophy: React.FC = () => {
       <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <span className="text-primary font-bold tracking-wider text-sm uppercase mb-4 block">Philosophy</span>
-          <h2 className="text-3xl md:text-4xl font-black text-[#111418] leading-tight mb-6">
-            「腕が主役、<br className="md:hidden" />AI/DXは加速装置」
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-[#111418] leading-tight mb-4">
+            院長は施術に集中していい。
           </h2>
-          <div className="w-20 h-1 bg-primary mx-auto rounded-full"></div>
+          <p className="text-xl md:text-2xl lg:text-3xl font-bold text-[#333333] leading-tight">
+            事務業務・共有・発信は、私が回る仕組みにします。
+          </p>
+          <div className="w-20 h-1 bg-primary mx-auto rounded-full mt-8"></div>
         </div>
 
-        {/* Updated typography classes for better readability */}
-        <div className="mx-auto text-gray-700 text-lg md:text-xl leading-loose md:leading-loose space-y-8 text-justify md:text-left tracking-wide font-medium">
-          <p>
-            整体院や整骨院の仕事は、結局のところ「良くなる」という結果で評価される世界だと思っています。技術が上がれば、患者さんの満足度が上がり、紹介やリピートが増える。だから私は、何よりも施術という“個人技”を磨くことに集中してきました。実際、12年間現場に立ちながら、レッドコードのような専門的なアプローチも取り入れ、「目の前の人に効果を出す」ことを最優先に積み上げてきました。
-          </p>
-          <p>
-            一方で、時代は確実に変わっています。日本全体の人口が減れば、患者さんの総数は減っていく。これまでのように「決まったパターンの施術を回していれば成立する」時代は、少しずつ終わっていくはずです。これからは、ちゃんと治してくれる、変化を出してくれる、本質的な満足度を提供できるところに人が集まる。つまり“腕”が正当に評価される時代が来る。その流れは、私にとっては追い風でもあります。
-          </p>
-          <p>
-            ただし、腕だけでは届かない壁もあります。施術の価値は、伝わらなければ選ばれない。説明が難しい、来院の理由が腹落ちしない、セルフケアが続かない——そんな「伝達のズレ」だけで、良い技術が損をしてしまうこともある。さらに、今は誰もが情報発信できる時代で、患者さん側もAIで調べ、比較し、納得して選ぶようになりました。だからこそ、現場はより本質に向かう一方で、“伝わる設計”と“継続できる仕組み”が必須になります。
-          </p>
-          <p>
-            そこで私は、生成AIやDXを「技術を置き換えるもの」ではなく、「技術に全集中するための加速装置」として使います。事務作業、文章作成、発信、予約導線、説明の整理。こうした周辺業務を軽くし、臨床の振り返りを積み上げ、患者さんに分かる言葉へ翻訳する。その結果、施術の精度を上げる時間が増え、成果が伝わり、満足度が高まり、選ばれる理由が強くなる。私が目指しているのは、マーケティングだけで売上を作る経営ではなく、技術を育て、成果で評価される経営です。
-          </p>
-          
-          <div className="bg-background-light p-8 md:p-10 rounded-2xl border-l-4 border-primary mt-12 shadow-sm">
-            <p className="font-bold text-[#111418] text-xl md:text-2xl leading-relaxed">
-              腕を磨く。成果を出す。<br className="md:hidden" />AI/DXで、それを続けられる院にする。<br />
-              <span className="text-primary mt-4 block text-lg md:text-xl font-bold">私はその実験を、自分の現場で続けています。</span>
+        {/* 三原則セクション */}
+        <div className="grid md:grid-cols-3 gap-6 md:gap-8 mb-12">
+          {/* 原則1 */}
+          <div className="bg-gradient-to-br from-blue-50 to-white p-6 md:p-8 rounded-xl border border-blue-100 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="flex items-center justify-center w-8 h-8 bg-primary text-white font-bold text-sm rounded-full">1</span>
+              <h3 className="text-lg md:text-xl font-bold text-[#111418] leading-snug">
+                腕が主役
+              </h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-3">(施術と判断に集中)</p>
+            <p className="text-gray-700 leading-relaxed">
+              AIは施術を置き換えるものではなく、<span className="font-semibold text-[#111418]">院長の時間を増やすため</span>に使います。
             </p>
           </div>
+
+          {/* 原則2 */}
+          <div className="bg-gradient-to-br from-blue-50 to-white p-6 md:p-8 rounded-xl border border-blue-100 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="flex items-center justify-center w-8 h-8 bg-primary text-white font-bold text-sm rounded-full">2</span>
+              <h3 className="text-lg md:text-xl font-bold text-[#111418] leading-snug">
+                運用が先、ツールは後
+              </h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-3">(テンプレ×フロー)</p>
+            <p className="text-gray-700 leading-relaxed">
+              ツール導入より先に、<span className="font-semibold text-[#111418]">院内で回る型</span>（テンプレ＋運用フロー）を作ります。
+            </p>
+          </div>
+
+          {/* 原則3 */}
+          <div className="bg-gradient-to-br from-blue-50 to-white p-6 md:p-8 rounded-xl border border-blue-100 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="flex items-center justify-center w-8 h-8 bg-primary text-white font-bold text-sm rounded-full">3</span>
+              <h3 className="text-lg md:text-xl font-bold text-[#111418] leading-snug">
+                患者情報は扱わない
+              </h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-3">(安心が前提)</p>
+            <p className="text-gray-700 leading-relaxed">
+              患者さんの個人情報を入力しない設計で、<span className="font-semibold text-[#111418]">安全に運用できる範囲</span>から始めます。
+            </p>
+          </div>
+        </div>
+
+        {/* 続きを読むボタンと折りたたみ本文 */}
+        <div className="text-center">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="inline-flex items-center gap-2 text-primary font-semibold hover:text-primary-dark transition-colors py-2 px-4 rounded-lg hover:bg-blue-50"
+            aria-expanded={isOpen}
+          >
+            {isOpen ? (
+              <>
+                <span>閉じる</span>
+                <svg className="w-4 h-4 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                </svg>
+              </>
+            ) : (
+              <>
+                <span>続きを読む</span>
+                <svg className="w-4 h-4 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </>
+            )}
+          </button>
+
+          {isOpen && (
+            <div className="mt-8 text-left bg-gray-50 p-6 md:p-8 rounded-xl border border-gray-200">
+              <div className="prose prose-gray max-w-none text-gray-700 leading-loose md:leading-loose space-y-4">
+                <p>
+                  整体院の院長先生は、施術や技術の追求が好きな人が多い一方で、事務・院内共有・発信は後回しになりがちです。気づけばカルテ文や説明文、引き継ぎ、投稿作業に時間が取られ、院長が現場の"ボトルネック"になります。
+                </p>
+                <p>
+                  私がやるのは、ツールを入れて終わりではありません。まず「書く仕事・共有・発信」をテンプレ化し、誰がやっても同じ品質で回る運用フロー（役割、手順、チェックポイント）まで作ります。結果として、院長は施術と判断に集中でき、スタッフも迷わず動ける状態になります。
+                </p>
+                <p>
+                  また、患者さんの個人情報を入力しない設計で進めます。院内で安全に扱える情報だけで効果が出る領域から着手し、無理のない形で定着させます。
+                </p>
+                <p>
+                  初回は状況を整理し、「最短の一手」だけ決めましょう。
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
