@@ -1,6 +1,7 @@
 import React from 'react';
 import Hero from './Hero';
 import Stats from './Stats';
+import Checklist from './Checklist';
 import Philosophy from './Philosophy';
 import Services from './Services';
 import EventBoard from './EventBoard';
@@ -22,6 +23,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, events, posts }) => {
     <div className="animate-fade-in">
       <Hero />
       <Stats />
+      <Checklist />
       <Philosophy />
       <Services onNavigate={onNavigate} />
       <EventBoard events={events} />
