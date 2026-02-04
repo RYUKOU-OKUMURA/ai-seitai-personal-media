@@ -18,7 +18,7 @@ const Stats: React.FC = () => {
           {/* Stat 3 */}
           <div className="flex flex-col items-center justify-center text-center border-r border-gray-100 pt-4 md:pt-0 [&:nth-child(3)]:border-r-0 md:[&:nth-child(3)]:border-r">
             <span className="text-gray-500 text-sm font-medium mb-1">YouTube登録者</span>
-            <span className="text-3xl font-black text-[#111418]">5,800<span className="text-base font-bold text-primary ml-1">人</span></span>
+            <span className="text-3xl font-black text-[#111418]">5,800<span className="text-base font-bold text-primary ml-1">人+</span></span>
           </div>
           {/* Stat 4 */}
           <div className="flex flex-col items-center justify-center text-center pt-4 md:pt-0">

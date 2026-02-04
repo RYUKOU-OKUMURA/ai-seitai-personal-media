@@ -44,7 +44,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentRoute = 'home' }) =>
             <div className="size-8 text-primary bg-primary/10 rounded-lg flex items-center justify-center">
               <span className="material-symbols-outlined text-2xl">neurology</span>
             </div>
-            <span className="text-[#111418] text-lg font-bold tracking-tight">BOSS Personal Media</span>
+            <span className="text-[#111418] text-lg font-bold tracking-tight">整体院のAI仕組み化支援</span>
           </div>
 
           {/* Desktop Menu */}
