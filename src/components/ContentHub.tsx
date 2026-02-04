@@ -1,6 +1,54 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import type { YouTubeVideo } from '../types/youtube';
 
 const ContentHub: React.FC = () => {
+  const [videos, setVideos] = useState<YouTubeVideo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchYouTubeVideos = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/youtube?sort=date&max=2');
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch videos');
+        }
+
+        const data = await response.json();
+        setVideos(data.videos);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching YouTube videos:', err);
+        setError('動画の読み込みに失敗しました');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchYouTubeVideos();
+  }, []);
+
+  const formatViewCount = (count: string) => {
+    const num = parseInt(count);
+    if (num >= 1000000) {
+      return `${(num / 1000000).toFixed(1)}M`;
+    } else if (num >= 1000) {
+      return `${(num / 1000).toFixed(1)}K`;
+    }
+    return num.toString();
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ja-JP', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).replace(/\//g, '.');
+  };
+
   return (
     <section className="py-24 bg-white" id="content">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,36 +62,55 @@ const ContentHub: React.FC = () => {
             <h3 className="text-xl font-bold text-[#111418] flex items-center gap-2">
               <span className="material-symbols-outlined text-red-600">play_circle</span> YouTube 最新動画
             </h3>
-            <div className="grid sm:grid-cols-2 gap-6">
-              <a className="group block cursor-pointer">
-                <div className="aspect-video bg-gray-900 rounded-lg mb-3 overflow-hidden relative">
-                  <img 
-                    alt="Video thumbnail regarding AI tools for business" 
-                    className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" 
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWlIhS4_5Mk87fUsdQbSKLQM-0SxLglbr2c4Efg7pVW9klHhLnWGDj6-73BHdZ9VKmcIfa2ahdCbpEFGP-WxPUQypQGksm2EphKknumq0u03ifj-UkoCABD5VCbwQfpkmI42OykPy3Lsfj717VJrzDH-cTXtS3MvJyICA5Nb9oUwBnk-x1gW9-wpDnbG1ZZACBI_QzgxB2QtcJTag2qNxiNYHsQB5fFc5yeCz9DvHUAHn1M7hqljTCMpSyu18ud-R9b12WSUayk3c" 
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-white text-5xl drop-shadow-lg opacity-80 group-hover:scale-110 transition-transform">play_arrow</span>
-                  </div>
-                </div>
-                <h4 className="font-bold text-[#111418] leading-snug group-hover:text-primary transition-colors">【保存版】治療院経営で使えるChatGPTプロンプト10選</h4>
-                <span className="text-sm text-gray-500 mt-1 block">2023.10.15 • 12K Views</span>
-              </a>
-              <a className="group block cursor-pointer">
-                <div className="aspect-video bg-gray-900 rounded-lg mb-3 overflow-hidden relative">
-                  <img 
-                    alt="Video thumbnail abstract AI network visualization" 
-                    className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" 
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-MBdU3fHnJk8nlqpHsihLxtihjJHxKErj5V6NAaSn1nMTYDHQCP7tH92Qeb4rLGv4GjRZu_ZSqw7PoZgBIJfeKYdD7fM5lybo3GRrLlRkezHtxayZqshwTMTaXOn66Jn1pp7yd1gYCmAdtKjR3OkE_apsI7Scgd6pszNw-DgUYE8MgfA2p29NwkJqJOFWSRiwqscUUb5dfnRrBW4iV7iiwCFE9hrL8xEqZvkcazmbU2v_Ntv79WQpwYh4kf_pXXhhuVllLsiqIqI" 
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-white text-5xl drop-shadow-lg opacity-80 group-hover:scale-110 transition-transform">play_arrow</span>
-                  </div>
-                </div>
-                <h4 className="font-bold text-[#111418] leading-snug group-hover:text-primary transition-colors">小さなクリニックのDX、まずはここから始めよう。</h4>
-                <span className="text-sm text-gray-500 mt-1 block">2023.10.08 • 8.5K Views</span>
-              </a>
-            </div>
+
+            {loading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            )}
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
+                {error}
+              </div>
+            )}
+
+            {!loading && !error && videos.length === 0 && (
+              <div className="text-center py-12 text-gray-500">
+                動画が見つかりませんでした
+              </div>
+            )}
+
+            {!loading && !error && videos.length > 0 && (
+              <div className="grid sm:grid-cols-2 gap-6">
+                {videos.map((video) => (
+                  <a
+                    key={video.id}
+                    href={video.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block cursor-pointer"
+                  >
+                    <div className="aspect-video bg-gray-900 rounded-lg mb-3 overflow-hidden relative">
+                      <img
+                        alt={video.title}
+                        className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity"
+                        src={video.thumbnail}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-white text-5xl drop-shadow-lg opacity-80 group-hover:scale-110 transition-transform">play_arrow</span>
+                      </div>
+                    </div>
+                    <h4 className="font-bold text-[#111418] leading-snug group-hover:text-primary transition-colors">
+                      {video.title}
+                    </h4>
+                    <span className="text-sm text-gray-500 mt-1 block">
+                      {formatDate(video.publishedAt)} • {formatViewCount(video.viewCount)} Views
+                    </span>
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
           {/* Note Articles */}
           <div className="bg-white p-6 rounded-xl border border-gray-100 h-fit shadow-sm">
