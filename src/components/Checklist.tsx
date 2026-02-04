@@ -52,7 +52,7 @@ const Checklist: React.FC = () => {
                   <span className="text-xs font-bold text-primary tracking-widest uppercase">Self Check</span>
                 </div>
                 <h2 className="text-2xl md:text-3xl font-black text-[#111418] leading-tight">
-                  「この中で3つ以上なら、<br />
+                  「チェックが3つ以上なら、<br />
                   <span className="text-primary">仕組み化で一気に楽になります</span>」
                 </h2>
               </div>
@@ -79,9 +79,9 @@ const Checklist: React.FC = () => {
                         </div>
                         {/* Item text */}
                         <span className={`text-base leading-relaxed ${
-                          isChecked ? 'text-gray-400 line-through' : 'text-gray-700'
+                          isChecked ? 'text-gray-700' : 'text-gray-700'
                         }`}>
-                          □ {item}
+                          {item}
                         </span>
                       </div>
                     );
