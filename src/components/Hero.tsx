@@ -23,15 +23,14 @@ const Hero: React.FC = () => {
         カルテ文・院内共有・投稿をテンプレ化。<br />
         スタッフでも回る運用に落とし込みます。
       </p>
-      <div className="flex flex-wrap gap-4 pt-4">
-        <button className="flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white text-base font-bold h-12 px-8 rounded-lg shadow-lg shadow-blue-200 transition-all">
+      <div className="flex flex-col gap-3 pt-4">
+        <button className="flex items-center justify-center gap-3 bg-primary hover:bg-blue-600 text-white text-2xl font-bold h-16 px-6 rounded-full shadow-lg shadow-blue-200 transition-all">
           <span>無料相談を予約</span>
-          <span className="material-symbols-outlined text-sm">arrow_forward</span>
+          <span className="material-symbols-outlined text-lg">arrow_forward</span>
         </button>
-        <button className="flex items-center justify-center gap-2 bg-white border border-gray-200 hover:border-primary hover:text-primary text-[#111418] text-base font-bold h-12 px-8 rounded-lg transition-all shadow-md">
-          <span>チェックリストDL</span>
-          <span className="material-symbols-outlined text-sm">download</span>
-        </button>
+        <p className="text-sm text-gray-600 text-center">
+          まずは状況を聞いて、最短の一手だけご提案します（30分）
+        </p>
       </div>
     </div>
   );
