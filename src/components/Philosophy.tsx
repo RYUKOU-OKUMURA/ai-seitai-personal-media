@@ -18,7 +18,7 @@ const Philosophy: React.FC = () => {
             院長は施術に集中していい。
           </h2>
           <p className="text-xl md:text-2xl lg:text-3xl font-bold text-[#333333] leading-tight">
-            事務業務・共有・発信は、私が回る仕組みにします。
+            事務業務・共有・発信は、<br className="md:hidden" />私が回る仕組みにします。
           </p>
           <div className="w-20 h-1 bg-primary mx-auto rounded-full mt-8"></div>
         </div>

@@ -10,8 +10,8 @@ export default {
         "background-dark": "#111921",
       },
       fontFamily: {
-        "display": ['Inter', 'Noto Sans JP', 'Hiragino Sans', 'sans-serif'],
-        "sans": ['Inter', 'Noto Sans JP', 'Hiragino Sans', 'sans-serif'],
+        "display": ['LINE Seed JP', 'Hiragino Sans', 'sans-serif'],
+        "sans": ['LINE Seed JP', 'Hiragino Sans', 'sans-serif'],
       },
       borderRadius: {
         "DEFAULT": "0.25rem",
