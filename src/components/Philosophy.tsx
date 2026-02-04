@@ -24,44 +24,41 @@ const Philosophy: React.FC = () => {
         </div>
 
         {/* 三原則セクション */}
-        <div className="grid md:grid-cols-3 gap-6 md:gap-8 mb-12">
+        <div className="grid md:grid-cols-1 gap-6 md:gap-8 mb-12 max-w-[600px] mx-auto">
           {/* 原則1 */}
-          <div className="bg-gradient-to-br from-blue-50 to-white p-6 md:p-8 rounded-xl border border-blue-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="flex items-center justify-center w-8 h-8 bg-primary text-white font-bold text-sm rounded-full">1</span>
-              <h3 className="text-lg md:text-xl font-bold text-[#111418] leading-snug">
-                腕が主役
+          <div className="bg-gradient-to-br from-blue-50 to-white p-6 md:p-8 rounded-xl border border-blue-100 hover:shadow-md transition-shadow overflow-hidden">
+            <div className="flex items-center gap-3 mb-4 min-w-0">
+              <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-primary text-white font-bold text-sm rounded-full">1</span>
+              <h3 className="text-lg md:text-xl font-bold text-[#111418] leading-snug md:whitespace-nowrap break-words">
+                腕が主役 (施術と判断に集中)
               </h3>
             </div>
-            <p className="text-sm text-gray-600 mb-3">(施術と判断に集中)</p>
             <p className="text-gray-700 leading-relaxed">
               AIは施術を置き換えるものではなく、<span className="font-semibold text-[#111418]">院長の時間を増やすため</span>に使います。
             </p>
           </div>
 
           {/* 原則2 */}
-          <div className="bg-gradient-to-br from-blue-50 to-white p-6 md:p-8 rounded-xl border border-blue-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="flex items-center justify-center w-8 h-8 bg-primary text-white font-bold text-sm rounded-full">2</span>
-              <h3 className="text-lg md:text-xl font-bold text-[#111418] leading-snug">
-                運用が先、ツールは後
+          <div className="bg-gradient-to-br from-blue-50 to-white p-6 md:p-8 rounded-xl border border-blue-100 hover:shadow-md transition-shadow overflow-hidden">
+            <div className="flex items-center gap-3 mb-4 min-w-0">
+              <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-primary text-white font-bold text-sm rounded-full">2</span>
+              <h3 className="text-lg md:text-xl font-bold text-[#111418] leading-snug md:whitespace-nowrap break-words">
+                運用が先、ツールは後 (テンプレ×フロー)
               </h3>
             </div>
-            <p className="text-sm text-gray-600 mb-3">(テンプレ×フロー)</p>
             <p className="text-gray-700 leading-relaxed">
               ツール導入より先に、<span className="font-semibold text-[#111418]">院内で回る型</span>（テンプレ＋運用フロー）を作ります。
             </p>
           </div>
 
           {/* 原則3 */}
-          <div className="bg-gradient-to-br from-blue-50 to-white p-6 md:p-8 rounded-xl border border-blue-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="flex items-center justify-center w-8 h-8 bg-primary text-white font-bold text-sm rounded-full">3</span>
-              <h3 className="text-lg md:text-xl font-bold text-[#111418] leading-snug">
-                患者情報は扱わない
+          <div className="bg-gradient-to-br from-blue-50 to-white p-6 md:p-8 rounded-xl border border-blue-100 hover:shadow-md transition-shadow overflow-hidden">
+            <div className="flex items-center gap-3 mb-4 min-w-0">
+              <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-primary text-white font-bold text-sm rounded-full">3</span>
+              <h3 className="text-lg md:text-xl font-bold text-[#111418] leading-snug md:whitespace-nowrap break-words">
+                患者情報は扱わない (安心が前提)
               </h3>
             </div>
-            <p className="text-sm text-gray-600 mb-3">(安心が前提)</p>
             <p className="text-gray-700 leading-relaxed">
               患者さんの個人情報を入力しない設計で、<span className="font-semibold text-[#111418]">安全に運用できる範囲</span>から始めます。
             </p>
