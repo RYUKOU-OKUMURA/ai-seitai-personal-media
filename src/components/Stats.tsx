@@ -23,7 +23,7 @@ const Stats: React.FC = () => {
           {/* Stat 4 */}
           <div className="flex flex-col items-center justify-center text-center pt-4 md:pt-0">
             <span className="text-gray-500 text-sm font-medium mb-1">開発・導入ツール</span>
-            <span className="text-3xl font-black text-[#111418]">20<span className="text-base font-bold text-primary ml-1">個</span></span>
+            <span className="text-3xl font-black text-[#111418]">20<span className="text-base font-bold text-primary ml-1">個+</span></span>
           </div>
         </div>
       </div>
