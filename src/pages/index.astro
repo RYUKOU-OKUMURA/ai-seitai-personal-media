@@ -24,6 +24,6 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
 	}));
 ---
 
-<Layout title="BOSS Personal Media | AIと歩む、次世代の治療院経営">
+<Layout title="整体院のAI仕組み化支援">
 	<AppRoot client:only="react" events={events} posts={posts} />
 </Layout>

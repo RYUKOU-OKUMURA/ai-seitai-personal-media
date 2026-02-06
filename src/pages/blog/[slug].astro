@@ -22,7 +22,7 @@ const { post } = Astro.props as { post: BlogEntry };
 const { Content } = await post.render();
 ---
 
-<Layout title={`${post.data.title} | BOSS Personal Media`}>
+<Layout title={`${post.data.title} | 整体院のAI仕組み化支援`}>
 	<main class="bg-white min-h-screen">
 		<header class="bg-background-light pt-20 pb-10 px-4 border-b border-gray-200">
 			<div class="max-w-[900px] mx-auto">
@@ -75,4 +75,3 @@ const { Content } = await post.render();
 		</section>
 	</main>
 </Layout>
-
