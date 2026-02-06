@@ -49,11 +49,11 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentRoute = 'home' }) =>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-8">
-            <a className="text-sm font-medium text-gray-600 hover:text-primary transition-colors cursor-pointer" onClick={(e) => handleLinkClick(e, '#services')} href="#services">サービス</a>
-            <a className="text-sm font-medium text-gray-600 hover:text-primary transition-colors cursor-pointer" onClick={(e) => handleLinkClick(e, '#events')} href="#events">イベント</a>
-            <a className="text-sm font-medium text-gray-600 hover:text-primary transition-colors cursor-pointer" onClick={(e) => handleLinkClick(e, '#blog')} href="#blog">コラム</a>
-            <a className="text-sm font-medium text-gray-600 hover:text-primary transition-colors cursor-pointer" onClick={(e) => handleLinkClick(e, '#content')} href="#content">メディア</a>
-            <a className="text-sm font-medium text-gray-600 hover:text-primary transition-colors cursor-pointer" onClick={(e) => handleLinkClick(e, '#about')} href="#about">プロフィール</a>
+            <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors cursor-pointer" onClick={(e) => handleLinkClick(e, '#services')} href="#services">サービス</a>
+            <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors cursor-pointer" onClick={(e) => handleLinkClick(e, '#events')} href="#events">イベント</a>
+            <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors cursor-pointer" onClick={(e) => handleLinkClick(e, '#blog')} href="#blog">コラム</a>
+            <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors cursor-pointer" onClick={(e) => handleLinkClick(e, '#content')} href="#content">メディア</a>
+            <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors cursor-pointer" onClick={(e) => handleLinkClick(e, '#about')} href="#about">プロフィール</a>
             <button 
               onClick={(e) => handleLinkClick(e as any, '#contact')}
               className="bg-primary hover:bg-blue-600 text-white text-sm font-bold py-2.5 px-5 rounded-lg transition-all shadow-sm shadow-blue-200"
@@ -76,11 +76,11 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentRoute = 'home' }) =>
         {/* Mobile Menu Dropdown */}
         {isOpen && (
           <div className="md:hidden bg-white border-t border-gray-100 absolute left-0 right-0 shadow-lg px-4 py-4 flex flex-col gap-4">
-            <a className="text-sm font-medium text-gray-600 hover:text-primary transition-colors" href="#services" onClick={(e) => handleLinkClick(e, '#services')}>サービス</a>
-            <a className="text-sm font-medium text-gray-600 hover:text-primary transition-colors" href="#events" onClick={(e) => handleLinkClick(e, '#events')}>イベント</a>
-            <a className="text-sm font-medium text-gray-600 hover:text-primary transition-colors" href="#blog" onClick={(e) => handleLinkClick(e, '#blog')}>コラム</a>
-            <a className="text-sm font-medium text-gray-600 hover:text-primary transition-colors" href="#content" onClick={(e) => handleLinkClick(e, '#content')}>メディア</a>
-            <a className="text-sm font-medium text-gray-600 hover:text-primary transition-colors" href="#about" onClick={(e) => handleLinkClick(e, '#about')}>プロフィール</a>
+            <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors" href="#services" onClick={(e) => handleLinkClick(e, '#services')}>サービス</a>
+            <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors" href="#events" onClick={(e) => handleLinkClick(e, '#events')}>イベント</a>
+            <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors" href="#blog" onClick={(e) => handleLinkClick(e, '#blog')}>コラム</a>
+            <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors" href="#content" onClick={(e) => handleLinkClick(e, '#content')}>メディア</a>
+            <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors" href="#about" onClick={(e) => handleLinkClick(e, '#about')}>プロフィール</a>
              <button 
               onClick={(e) => handleLinkClick(e as any, '#contact')}
               className="bg-primary hover:bg-blue-600 text-white text-sm font-bold py-3 px-5 rounded-lg transition-all w-full text-center"

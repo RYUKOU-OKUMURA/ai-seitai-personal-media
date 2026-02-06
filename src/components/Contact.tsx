@@ -6,7 +6,7 @@ const Contact: React.FC = () => {
       <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-black text-[#111418] mb-4">お問い合わせ・無料相談</h2>
-          <p className="text-gray-600">まずは30分の無料Zoom相談で、貴院の課題をお聞かせください。</p>
+          <p className="text-gray-700 leading-relaxed">まずは30分の無料Zoom相談で、貴院の課題をお聞かせください。</p>
         </div>
         <form className="bg-white p-8 md:p-10 rounded-xl shadow-lg border border-gray-100 space-y-6" onSubmit={(e) => e.preventDefault()}>
           <div className="grid md:grid-cols-2 gap-6">
@@ -62,7 +62,7 @@ const Contact: React.FC = () => {
             送信する
           </button>
         </form>
-        <p className="text-center text-xs text-gray-400 mt-6">
+        <p className="text-center text-xs text-gray-500 leading-relaxed mt-6">
           ※ 送信いただいた情報は、お問い合わせ対応以外の目的には使用いたしません。<br />
           通常、2営業日以内にご返信いたします。
         </p>

@@ -35,19 +35,19 @@ const CaseStudies: React.FC<CaseStudiesProps> = ({ onNavigate }) => {
                 aria-label={study.title}
               ></div>
               <div className="p-6 flex flex-col flex-grow">
-                <div className="text-xs text-gray-400 mb-2 flex items-center gap-2">
+                <div className="text-xs text-gray-500 mb-2 flex items-center gap-2">
                   {study.date && <span className="font-bold">{study.date}</span>}
                   <span>{study.client}</span>
                 </div>
                 <h3 className="text-lg font-bold text-[#111418] mb-4 line-clamp-2 group-hover:text-primary transition-colors">
                   {study.title}
                 </h3>
-                <p className="text-sm text-gray-600 mb-4 flex-grow line-clamp-3">
+                <p className="text-sm text-gray-700 leading-relaxed mb-4 flex-grow line-clamp-3">
                   {study.excerpt}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-auto">
                   {study.tags.map((tag, i) => (
-                    <span key={i} className={`text-xs font-bold px-2 py-1 rounded ${i === 0 ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-600'}`}>
+                    <span key={i} className={`text-xs font-bold px-2 py-1 rounded ${i === 0 ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700'}`}>
                       {tag}
                     </span>
                   ))}

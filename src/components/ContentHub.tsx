@@ -128,7 +128,7 @@ const ContentHub: React.FC = () => {
                   ></div>
                   <div>
                     <h4 className="font-bold text-[#111418] text-sm leading-snug mb-1 group-hover:text-primary transition-colors">個人院長がAIを学ぶべき本当の理由。技術革新の波に乗るために。</h4>
-                    <span className="text-xs text-gray-400">2 days ago</span>
+                    <span className="text-xs text-gray-500">2 days ago</span>
                   </div>
                 </div>
               </a>
@@ -143,7 +143,7 @@ const ContentHub: React.FC = () => {
                   ></div>
                   <div>
                     <h4 className="font-bold text-[#111418] text-sm leading-snug mb-1 group-hover:text-primary transition-colors">スタッフ教育にAIを取り入れたら、離職率が下がった話。</h4>
-                    <span className="text-xs text-gray-400">1 week ago</span>
+                    <span className="text-xs text-gray-500">1 week ago</span>
                   </div>
                 </div>
               </a>

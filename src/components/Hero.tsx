@@ -28,7 +28,7 @@ const Hero: React.FC = () => {
           <span>無料相談を予約</span>
           <span className="material-symbols-outlined text-lg">arrow_forward</span>
         </button>
-        <p className="text-sm text-gray-600 text-center">
+        <p className="text-sm text-gray-700 leading-relaxed text-center">
           まずは状況を聞いて、最短の一手だけご提案します（30分）
         </p>
       </div>

@@ -30,13 +30,13 @@ const EventBoard: React.FC<EventBoardProps> = ({ events }) => {
             <div className="hidden md:flex gap-2">
               <button 
                 onClick={() => scroll('left')}
-                className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover:border-primary/50 text-gray-600 transition-all"
+                className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover:border-primary/50 text-gray-700 transition-all"
               >
                 <span className="material-symbols-outlined">chevron_left</span>
               </button>
               <button 
                 onClick={() => scroll('right')}
-                className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover:border-primary/50 text-gray-600 transition-all"
+                className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover:border-primary/50 text-gray-700 transition-all"
               >
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>

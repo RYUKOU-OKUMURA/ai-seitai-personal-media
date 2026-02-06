@@ -22,7 +22,7 @@ const InternalBlog: React.FC<InternalBlogProps> = ({ posts }) => {
           <div>
             <span className="text-primary font-bold tracking-wider text-sm uppercase mb-2 block">Official Column</span>
             <h2 className="text-3xl font-black text-[#111418]">院長コラム・ブログ</h2>
-            <p className="text-gray-600 mt-2">日々の気づきや、AI活用の裏話などを更新しています。</p>
+            <p className="text-gray-700 mt-2 leading-relaxed">日々の気づきや、AI活用の裏話などを更新しています。</p>
           </div>
           <a
             href="/blog"
@@ -58,14 +58,14 @@ const InternalBlog: React.FC<InternalBlogProps> = ({ posts }) => {
                   </div>
                 </div>
                 <div className="p-6 flex flex-col flex-grow">
-                  <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
                     <span className="material-symbols-outlined text-sm">schedule</span>
                     {formatDate(post.publishedAt)}
                   </div>
                   <h3 className="text-lg font-bold text-[#111418] mb-3 leading-snug group-hover:text-primary transition-colors line-clamp-2">
                     {post.title}
                   </h3>
-                  <p className="text-sm text-gray-600 line-clamp-3 mb-4 flex-grow">
+                  <p className="text-sm text-gray-700 leading-relaxed line-clamp-3 mb-4 flex-grow">
                     {post.excerpt}
                   </p>
                   <div className="text-primary text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all mt-auto">
