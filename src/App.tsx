@@ -36,9 +36,9 @@ const App: React.FC<AppProps> = ({ events, posts }) => {
         {currentRoute === 'home' && (
           <Home onNavigate={navigate} events={events} posts={posts} />
         )}
-        {currentRoute === 'ai-training' && <AiTrainingPage onNavigate={navigate} />}
-        {currentRoute === 'ai-tools' && <AiToolsPage onNavigate={navigate} />}
-        {currentRoute === 'dx-consulting' && <DxConsultingPage onNavigate={navigate} />}
+        {(currentRoute === 'hasshin' || currentRoute === 'ai-training') && <AiTrainingPage onNavigate={navigate} />}
+        {(currentRoute === 'kyouyuu' || currentRoute === 'ai-tools') && <AiToolsPage onNavigate={navigate} />}
+        {(currentRoute === 'jimu' || currentRoute === 'dx-consulting') && <DxConsultingPage onNavigate={navigate} />}
 
         {currentRoute === 'case-detail' && selectedCaseId && (
           <CaseStudyDetail id={selectedCaseId} cases={INITIAL_CASE_STUDIES} onNavigate={navigate} />
