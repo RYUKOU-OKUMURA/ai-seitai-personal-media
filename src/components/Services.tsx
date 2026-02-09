@@ -26,7 +26,7 @@ const Services: React.FC<ServicesProps> = ({ onNavigate }) => {
             <p className="text-gray-700 leading-relaxed mb-4 flex-grow">
               ブログ・SNS・LINEが「書けない・続かない」を解消。ネタ出しから文章作成・確認・投稿まで、スタッフでも回せる"型"を設計します。
             </p>
-            <p className="text-gray-500 text-sm mb-6">"書けない・続かない"が、"迷わず出せる"に変わります。</p>
+            <p className="text-gray-500 text-sm mb-6">"書けない・続かない"が、"迷わず書ける"に変わります。</p>
             <button
               className="inline-flex items-center text-primary font-bold hover:underline text-left"
               onClick={() => onNavigate && onNavigate('hasshin')}
