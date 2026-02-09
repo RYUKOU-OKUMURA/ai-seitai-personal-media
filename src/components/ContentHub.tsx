@@ -117,38 +117,19 @@ const ContentHub: React.FC = () => {
             <h3 className="text-xl font-bold text-[#111418] mb-6 flex items-center gap-2">
               <span className="material-symbols-outlined text-green-600">edit_note</span> note 記事
             </h3>
-            <div className="space-y-6">
-              <a className="block group cursor-pointer">
-                <div className="flex gap-4 items-start">
-                  <div 
-                    className="w-20 h-20 bg-gray-100 rounded-md shrink-0 bg-cover bg-center" 
-                    style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBORBNwMAfCfv91YIvhRTpcLmlyNE1931BQsfZ7hro8XM6o-CCWG62c2YpagSp3inYIuc5R6DCjRQvHqdDzy9fGN0nY9Ec1nS7O6FGOPjR3U6CTz6lLOgBZqK5MlJL2Z_hwBEYWimpdPJThi6B0687oI6QB4DUsLxQJLLOzrqov8OZcz5DsVvyV_STPSR55aCjBXe-qh3iCyCRjvTyCmY_HJofZQpZFWlFbWIwQ5HngE2137FRPqLTPi1lt2l7qo9poGM5JOepDNYA')" }}
-                    role="img"
-                    aria-label="Notebook and pen"
-                  ></div>
-                  <div>
-                    <h4 className="font-bold text-[#111418] text-sm leading-snug mb-1 group-hover:text-primary transition-colors">個人院長がAIを学ぶべき本当の理由。技術革新の波に乗るために。</h4>
-                    <span className="text-xs text-gray-500">2 days ago</span>
-                  </div>
-                </div>
-              </a>
-              <div className="border-t border-gray-100"></div>
-              <a className="block group cursor-pointer">
-                <div className="flex gap-4 items-start">
-                  <div 
-                    className="w-20 h-20 bg-gray-100 rounded-md shrink-0 bg-cover bg-center" 
-                    style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBO2sG91u3o3HaNBi3oP5nSeMhJrjnmS33G3V6Z0tMjoAM41CAG9vmUfQmSskmaXBDD4LvQ6ZkAV_7tRiakCgcGgt8dsCaIznI9hgumJ6CGNc8a1fDc3uryXWa_jn051pNqY05L6f1cZp6H2mNDJE_qGC-1CSXgZYM9umAh13kPGmBFV5E4qhntpFSAtMU5eQKMuEVaPRW2K2VLJWMSaQoQlnYwDQreoWeIUIXfGSN6JDCS9wLtWz-6v8jp4aaV6EPZsnvxO0pGePQ')" }}
-                    role="img"
-                    aria-label="Team brainstorming"
-                  ></div>
-                  <div>
-                    <h4 className="font-bold text-[#111418] text-sm leading-snug mb-1 group-hover:text-primary transition-colors">スタッフ教育にAIを取り入れたら、離職率が下がった話。</h4>
-                    <span className="text-xs text-gray-500">1 week ago</span>
-                  </div>
-                </div>
-              </a>
-              <div className="border-t border-gray-100"></div>
-              <a className="block text-center text-sm font-bold text-primary mt-4 hover:underline cursor-pointer">もっと見る</a>
+            <div className="space-y-4">
+              <iframe
+                className="note-embed"
+                src="https://note.com/embed/notes/n01666893b41b"
+                style={{ border: 0, display: 'block', maxWidth: '99%', width: '100%', padding: 0, margin: 0 }}
+                height="230"
+              ></iframe>
+              <iframe
+                className="note-embed"
+                src="https://note.com/embed/notes/nd1e3fb5c79c8"
+                style={{ border: 0, display: 'block', maxWidth: '99%', width: '100%', padding: 0, margin: 0 }}
+                height="230"
+              ></iframe>
             </div>
           </div>
         </div>
