@@ -1,14 +1,10 @@
 /* empty css                                    */
 import { c as createComponent, r as renderComponent, a as renderTemplate, b as createAstro, m as maybeRenderHead, d as addAttribute } from '../../chunks/astro/server_Dqlu1aGj.mjs';
 import 'piccolore';
-import { $ as $$Layout, g as getCollection } from '../../chunks/_astro_content_COrROn4_.mjs';
+import { a as getEntry, $ as $$Layout } from '../../chunks/_astro_content_DQtuMFkd.mjs';
 export { renderers } from '../../renderers.mjs';
 
 const $$Astro = createAstro();
-async function getStaticPaths() {
-  const posts = await getCollection("blog", ({ data }) => !data.draft);
-  return posts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
-}
 const $$slug = createComponent(async ($$result, $$props, $$slots) => {
   const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
   Astro2.self = $$slug;
@@ -20,7 +16,11 @@ const $$slug = createComponent(async ($$result, $$props, $$slots) => {
     const d = String(date.getUTCDate()).padStart(2, "0");
     return `${y}.${m}.${d}`;
   };
-  const { post } = Astro2.props;
+  const slug = Astro2.params.slug;
+  const post = slug ? await getEntry("blog", slug) : void 0;
+  if (!post || post.data.draft) {
+    return Astro2.redirect("/blog");
+  }
   const { Content } = await post.render();
   return renderTemplate`${renderComponent($$result, "Layout", $$Layout, { "title": `${post.data.title} | \u6574\u4F53\u9662\u306EAI\u4ED5\u7D44\u307F\u5316\u652F\u63F4` }, { "default": async ($$result2) => renderTemplate` ${maybeRenderHead()}<main class="bg-white min-h-screen"> <header class="bg-background-light pt-20 pb-10 px-4 border-b border-gray-200"> <div class="max-w-[900px] mx-auto"> <a href="/blog" class="inline-flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-primary transition-colors"> <span class="material-symbols-outlined text-base">arrow_back</span>
 記事一覧に戻る
@@ -38,7 +38,6 @@ const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
 	__proto__: null,
 	default: $$slug,
 	file: $$file,
-	getStaticPaths,
 	url: $$url
 }, Symbol.toStringTag, { value: 'Module' }));
 

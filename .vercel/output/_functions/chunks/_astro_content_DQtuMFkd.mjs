@@ -230,6 +230,89 @@ function emulateLegacyEntry({ legacyId, ...entry }) {
     render: () => renderEntry(legacyEntry)
   };
 }
+function createGetEntry({
+  getEntryImport,
+  getRenderEntryImport,
+  collectionNames,
+  liveCollections
+}) {
+  return async function getEntry(collectionOrLookupObject, lookup) {
+    let collection, lookupId;
+    if (typeof collectionOrLookupObject === "string") {
+      collection = collectionOrLookupObject;
+      if (!lookup)
+        throw new AstroError({
+          ...UnknownContentCollectionError,
+          message: "`getEntry()` requires an entry identifier as the second argument."
+        });
+      lookupId = lookup;
+    } else {
+      collection = collectionOrLookupObject.collection;
+      lookupId = "id" in collectionOrLookupObject ? collectionOrLookupObject.id : collectionOrLookupObject.slug;
+    }
+    if (collection in liveCollections) {
+      throw new AstroError({
+        ...UnknownContentCollectionError,
+        message: `Collection "${collection}" is a live collection. Use getLiveEntry() instead of getEntry().`
+      });
+    }
+    if (typeof lookupId === "object") {
+      throw new AstroError({
+        ...UnknownContentCollectionError,
+        message: `The entry identifier must be a string. Received object.`
+      });
+    }
+    const store = await globalDataStore.get();
+    if (store.hasCollection(collection)) {
+      const entry2 = store.get(collection, lookupId);
+      if (!entry2) {
+        console.warn(`Entry ${collection} → ${lookupId} was not found.`);
+        return;
+      }
+      const { default: imageAssetMap } = await import('./content-assets_DleWbedO.mjs');
+      entry2.data = updateImageReferencesInData(entry2.data, entry2.filePath, imageAssetMap);
+      if (entry2.legacyId) {
+        return emulateLegacyEntry({ ...entry2, collection });
+      }
+      return {
+        ...entry2,
+        collection
+      };
+    }
+    if (!collectionNames.has(collection)) {
+      console.warn(
+        `The collection ${JSON.stringify(collection)} does not exist. Please ensure it is defined in your content config.`
+      );
+      return void 0;
+    }
+    const entryImport = await getEntryImport(collection, lookupId);
+    if (typeof entryImport !== "function") return void 0;
+    const entry = await entryImport();
+    if (entry._internal.type === "content") {
+      return {
+        id: entry.id,
+        slug: entry.slug,
+        body: entry.body,
+        collection: entry.collection,
+        data: entry.data,
+        async render() {
+          return render({
+            collection: entry.collection,
+            id: entry.id,
+            renderEntryImport: await getRenderEntryImport(collection, lookupId)
+          });
+        }
+      };
+    } else if (entry._internal.type === "data") {
+      return {
+        id: entry.id,
+        collection: entry.collection,
+        data: entry.data
+      };
+    }
+    return void 0;
+  };
+}
 const CONTENT_LAYER_IMAGE_REGEX = /__ASTRO_IMAGE_="([^"]+)"/g;
 async function updateImageReferencesInBody(html, fileName) {
   const { default: imageAssetMap } = await import('./content-assets_DleWbedO.mjs');
@@ -411,7 +494,7 @@ const dataCollectionToEntryMap = createCollectionToGlobResultMap({
 	globResult: dataEntryGlob,
 	contentDir,
 });
-createCollectionToGlobResultMap({
+const collectionToEntryMap = createCollectionToGlobResultMap({
 	globResult: { ...contentEntryGlob, ...dataEntryGlob },
 	contentDir,
 });
@@ -419,7 +502,7 @@ createCollectionToGlobResultMap({
 let lookupMap = {};
 lookupMap = {};
 
-new Set(Object.keys(lookupMap));
+const collectionNames = new Set(Object.keys(lookupMap));
 
 function createGlobLookup(glob) {
 	return async (collection, lookupId) => {
@@ -445,4 +528,11 @@ const getCollection = createGetCollection({
 	liveCollections,
 });
 
-export { $$Layout as $, getCollection as g };
+const getEntry = createGetEntry({
+	getEntryImport: createGlobLookup(collectionToEntryMap),
+	getRenderEntryImport: createGlobLookup(collectionToRenderEntryMap),
+	collectionNames,
+	liveCollections,
+});
+
+export { $$Layout as $, getEntry as a, getCollection as g };

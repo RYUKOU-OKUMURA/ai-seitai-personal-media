@@ -1,8 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { getCollection, type CollectionEntry } from 'astro:content';
-
-type BlogEntry = CollectionEntry<'blog'>;
+import { getEntry } from 'astro:content';
 
 const formatDate = (iso: string) => {
 	const date = new Date(iso);
@@ -13,12 +11,13 @@ const formatDate = (iso: string) => {
 	return `${y}.${m}.${d}`;
 };
 
-export async function getStaticPaths() {
-	const posts = await getCollection('blog', ({ data }) => !data.draft);
-	return posts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
+const slug = Astro.params.slug;
+const post = slug ? await getEntry('blog', slug) : undefined;
+
+if (!post || post.data.draft) {
+	return Astro.redirect('/blog');
 }
 
-const { post } = Astro.props as { post: BlogEntry };
 const { Content } = await post.render();
 ---
 

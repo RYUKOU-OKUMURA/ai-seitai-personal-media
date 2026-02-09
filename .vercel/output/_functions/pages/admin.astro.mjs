@@ -1,7 +1,7 @@
 /* empty css                                 */
 import { c as createComponent, r as renderComponent, a as renderTemplate, b as createAstro } from '../chunks/astro/server_Dqlu1aGj.mjs';
 import 'piccolore';
-import { g as getCollection, $ as $$Layout } from '../chunks/_astro_content_COrROn4_.mjs';
+import { g as getCollection, $ as $$Layout } from '../chunks/_astro_content_DQtuMFkd.mjs';
 import { g as getSessionFromRequest } from '../chunks/session_KD2Cv45Q.mjs';
 export { renderers } from '../renderers.mjs';
 
