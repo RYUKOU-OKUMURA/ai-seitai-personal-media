@@ -13,7 +13,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <div className="size-8 text-white bg-white/10 rounded-lg flex items-center justify-center">
               <span className="material-symbols-outlined text-2xl">neurology</span>
             </div>
-            <span className="text-xl font-bold tracking-tight">BOSS Personal Media</span>
+            <span className="text-xl font-bold tracking-tight">整体院のAI仕組み化支援</span>
           </div>
           <div className="flex gap-8 text-sm font-medium text-gray-400">
             <a className="hover:text-white transition-colors cursor-pointer" onClick={() => onNavigate && onNavigate('home')}>サービス一覧</a>
