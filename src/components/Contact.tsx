@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 const Contact: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [submittedAt, setSubmittedAt] = useState(() => Date.now().toString());
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -16,6 +17,8 @@ const Contact: React.FC = () => {
       email: formData.get('email') as string,
       category: formData.get('category') as string,
       message: formData.get('message') as string,
+      website: formData.get('website') as string,
+      submittedAt: formData.get('submittedAt') as string,
     };
 
     try {
@@ -28,6 +31,7 @@ const Contact: React.FC = () => {
       if (res.ok) {
         setStatus('success');
         form.reset();
+        setSubmittedAt(Date.now().toString());
       } else {
         const result = await res.json();
         setErrorMessage(result.error || '送信に失敗しました。');
@@ -53,7 +57,10 @@ const Contact: React.FC = () => {
             <p className="text-green-700">お問い合わせありがとうございます。2営業日以内にご返信いたします。</p>
             <button
               className="mt-6 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-              onClick={() => setStatus('idle')}
+              onClick={() => {
+                setStatus('idle');
+                setSubmittedAt(Date.now().toString());
+              }}
               type="button"
             >
               新しいお問い合わせ
@@ -61,6 +68,11 @@ const Contact: React.FC = () => {
           </div>
         ) : (
           <form className="bg-white p-8 md:p-10 rounded-xl shadow-lg border border-gray-100 space-y-6" onSubmit={handleSubmit}>
+            <input type="hidden" name="submittedAt" value={submittedAt} readOnly />
+            <div className="hidden" aria-hidden="true">
+              <label htmlFor="website">Website</label>
+              <input id="website" name="website" type="text" autoComplete="off" tabIndex={-1} />
+            </div>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-bold text-[#111418]" htmlFor="name">お名前 <span className="text-red-500">*</span></label>

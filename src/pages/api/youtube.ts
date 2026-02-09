@@ -1,109 +1,222 @@
 import type { APIRoute } from 'astro';
+import { applyRateLimitHeaders, checkRateLimit } from '../../server/security';
 
 const YOUTUBE_API_KEY = import.meta.env.YOUTUBE_API_KEY;
 const YOUTUBE_CHANNEL_ID = import.meta.env.YOUTUBE_CHANNEL_ID;
 
-export const GET: APIRoute = async ({ url }) => {
-  try {
-    const sortBy = url.searchParams.get('sort') || 'date'; // 'date' or 'viewCount'
-    const maxResults = url.searchParams.get('max') || '6';
+const YOUTUBE_RATE_LIMIT = {
+	namespace: 'youtube',
+	maxRequests: 60,
+	windowMs: 10 * 60 * 1000,
+} as const;
 
-    if (!YOUTUBE_API_KEY || !YOUTUBE_CHANNEL_ID) {
-      return new Response(
-        JSON.stringify({
-          error: 'YouTube API credentials not configured',
-          message: 'Please set YOUTUBE_API_KEY and YOUTUBE_CHANNEL_ID in .env.local'
-        }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
+const YOUTUBE_CACHE_TTL_MS = 10 * 60 * 1000;
+const YOUTUBE_TIMEOUT_MS = 10_000;
 
-    // Step 1: Get channel's uploads playlist ID
-    const channelResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${YOUTUBE_CHANNEL_ID}&key=${YOUTUBE_API_KEY}`
-    );
+type YouTubeVideo = {
+	id: string;
+	title: string;
+	description: string;
+	thumbnail: string;
+	publishedAt: string;
+	viewCount: string;
+	likeCount: string;
+	url: string;
+};
 
-    if (!channelResponse.ok) {
-      throw new Error(`YouTube API error: ${channelResponse.statusText}`);
-    }
+type PlaylistVideo = {
+	id: string;
+	title: string;
+	description: string;
+	thumbnail: string;
+	publishedAt: string;
+};
 
-    const channelData = await channelResponse.json();
+let cachedVideos: YouTubeVideo[] | null = null;
+let cacheExpiresAt = 0;
+let inFlightRefresh: Promise<YouTubeVideo[]> | null = null;
 
-    if (!channelData.items || channelData.items.length === 0) {
-      return new Response(
-        JSON.stringify({ error: 'Channel not found' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	typeof value === 'object' && value !== null && !Array.isArray(value);
 
-    const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
+const asString = (value: unknown): string => (typeof value === 'string' ? value : '');
 
-    // Step 2: Get videos from uploads playlist
-    const playlistResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=50&key=${YOUTUBE_API_KEY}`
-    );
+const toSafeInt = (value: string): number => {
+	const parsed = Number.parseInt(value, 10);
+	return Number.isFinite(parsed) ? parsed : 0;
+};
 
-    if (!playlistResponse.ok) {
-      throw new Error(`YouTube API error: ${playlistResponse.statusText}`);
-    }
+const buildJsonResponse = (body: unknown, status: number, baseHeaders: Headers): Response => {
+	const headers = new Headers(baseHeaders);
+	return new Response(JSON.stringify(body), { status, headers });
+};
 
-    const playlistData = await playlistResponse.json();
+const fetchJsonWithTimeout = async (url: string): Promise<unknown> => {
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), YOUTUBE_TIMEOUT_MS);
+	try {
+		const response = await fetch(url, { signal: controller.signal });
+		if (!response.ok) throw new Error(`upstream ${response.status}`);
+		return response.json();
+	} finally {
+		clearTimeout(timeoutId);
+	}
+};
 
-    // Step 3: Get video statistics (views, likes, etc.)
-    const videoIds = playlistData.items.map((item: any) => item.snippet.resourceId.videoId).join(',');
+const parseUploadsPlaylistId = (payload: unknown): string => {
+	if (!isRecord(payload) || !Array.isArray(payload.items) || payload.items.length === 0) {
+		throw new Error('invalid channel response');
+	}
+	const first = payload.items[0];
+	if (!isRecord(first)) throw new Error('invalid channel response');
 
-    const statsResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=${videoIds}&key=${YOUTUBE_API_KEY}`
-    );
+	const contentDetails = isRecord(first.contentDetails) ? first.contentDetails : null;
+	const relatedPlaylists = contentDetails && isRecord(contentDetails.relatedPlaylists) ? contentDetails.relatedPlaylists : null;
+	const uploads = relatedPlaylists ? asString(relatedPlaylists.uploads) : '';
+	if (!uploads) throw new Error('uploads playlist not found');
+	return uploads;
+};
 
-    if (!statsResponse.ok) {
-      throw new Error(`YouTube API error: ${statsResponse.statusText}`);
-    }
+const parsePlaylistVideos = (payload: unknown): PlaylistVideo[] => {
+	if (!isRecord(payload) || !Array.isArray(payload.items)) return [];
 
-    const statsData = await statsResponse.json();
+	const videos: PlaylistVideo[] = [];
+	for (const item of payload.items) {
+		if (!isRecord(item)) continue;
+		const snippet = isRecord(item.snippet) ? item.snippet : null;
+		if (!snippet) continue;
 
-    // Step 4: Combine data and format response
-    const videos = playlistData.items.map((item: any) => {
-      const videoId = item.snippet.resourceId.videoId;
-      const stats = statsData.items.find((stat: any) => stat.id === videoId);
+		const resourceId = isRecord(snippet.resourceId) ? snippet.resourceId : null;
+		const videoId = resourceId ? asString(resourceId.videoId) : '';
+		if (!videoId) continue;
 
-      return {
-        id: videoId,
-        title: item.snippet.title,
-        description: item.snippet.description,
-        thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url,
-        publishedAt: item.snippet.publishedAt,
-        viewCount: stats?.statistics.viewCount || '0',
-        likeCount: stats?.statistics.likeCount || '0',
-        url: `https://www.youtube.com/watch?v=${videoId}`
-      };
-    });
+		const thumbnails = isRecord(snippet.thumbnails) ? snippet.thumbnails : null;
+		const high = thumbnails && isRecord(thumbnails.high) ? asString(thumbnails.high.url) : '';
+		const medium = thumbnails && isRecord(thumbnails.medium) ? asString(thumbnails.medium.url) : '';
 
-    // Sort videos based on query parameter
-    if (sortBy === 'viewCount') {
-      videos.sort((a: any, b: any) => parseInt(b.viewCount) - parseInt(a.viewCount));
-    }
-    // 'date' sorting is already done by YouTube API (most recent first)
+		videos.push({
+			id: videoId,
+			title: asString(snippet.title),
+			description: asString(snippet.description),
+			thumbnail: high || medium || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+			publishedAt: asString(snippet.publishedAt),
+		});
+	}
 
-    // Limit results
-    const limitedVideos = videos.slice(0, parseInt(maxResults));
+	return videos;
+};
 
-    return new Response(JSON.stringify({ videos: limitedVideos }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=3600' // Cache for 1 hour
-      }
-    });
+const parseStatsMap = (payload: unknown): Map<string, { viewCount: string; likeCount: string }> => {
+	const stats = new Map<string, { viewCount: string; likeCount: string }>();
+	if (!isRecord(payload) || !Array.isArray(payload.items)) return stats;
 
-  } catch (error) {
-    console.error('YouTube API Error:', error);
-    return new Response(
-      JSON.stringify({
-        error: 'Failed to fetch YouTube videos',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
+	for (const item of payload.items) {
+		if (!isRecord(item)) continue;
+		const id = asString(item.id);
+		if (!id) continue;
+
+		const statistics = isRecord(item.statistics) ? item.statistics : null;
+		stats.set(id, {
+			viewCount: statistics ? asString(statistics.viewCount) || '0' : '0',
+			likeCount: statistics ? asString(statistics.likeCount) || '0' : '0',
+		});
+	}
+
+	return stats;
+};
+
+const fetchLatestVideos = async (): Promise<YouTubeVideo[]> => {
+	if (!YOUTUBE_API_KEY || !YOUTUBE_CHANNEL_ID) {
+		throw new Error('youtube credentials not configured');
+	}
+
+	const channelData = await fetchJsonWithTimeout(
+		`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${encodeURIComponent(YOUTUBE_CHANNEL_ID)}&key=${encodeURIComponent(YOUTUBE_API_KEY)}`,
+	);
+	const uploadsPlaylistId = parseUploadsPlaylistId(channelData);
+
+	const playlistData = await fetchJsonWithTimeout(
+		`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${encodeURIComponent(uploadsPlaylistId)}&maxResults=50&key=${encodeURIComponent(YOUTUBE_API_KEY)}`,
+	);
+	const playlistVideos = parsePlaylistVideos(playlistData);
+	if (playlistVideos.length === 0) return [];
+
+	const videoIds = playlistVideos.map((video) => video.id).join(',');
+	const statsData = await fetchJsonWithTimeout(
+		`https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${encodeURIComponent(videoIds)}&key=${encodeURIComponent(YOUTUBE_API_KEY)}`,
+	);
+	const statsMap = parseStatsMap(statsData);
+
+	return playlistVideos.map((video) => {
+		const stats = statsMap.get(video.id);
+		return {
+			id: video.id,
+			title: video.title,
+			description: video.description,
+			thumbnail: video.thumbnail,
+			publishedAt: video.publishedAt,
+			viewCount: stats?.viewCount ?? '0',
+			likeCount: stats?.likeCount ?? '0',
+			url: `https://www.youtube.com/watch?v=${video.id}`,
+		};
+	});
+};
+
+const getCachedVideos = async (): Promise<YouTubeVideo[]> => {
+	const now = Date.now();
+	if (cachedVideos && now < cacheExpiresAt) return cachedVideos;
+	if (inFlightRefresh) return inFlightRefresh;
+
+	inFlightRefresh = (async () => {
+		try {
+			const latest = await fetchLatestVideos();
+			cachedVideos = latest;
+			cacheExpiresAt = Date.now() + YOUTUBE_CACHE_TTL_MS;
+			return latest;
+		} catch (error) {
+			if (cachedVideos) return cachedVideos;
+			throw error;
+		} finally {
+			inFlightRefresh = null;
+		}
+	})();
+
+	return inFlightRefresh;
+};
+
+export const GET: APIRoute = async ({ request, url }) => {
+	const baseHeaders = new Headers({
+		'Content-Type': 'application/json; charset=utf-8',
+		'Cache-Control': 'public, max-age=60, s-maxage=600, stale-while-revalidate=120',
+	});
+
+	const rateLimit = checkRateLimit(request, YOUTUBE_RATE_LIMIT);
+	applyRateLimitHeaders(baseHeaders, rateLimit);
+	if (!rateLimit.allowed) {
+		baseHeaders.set('Cache-Control', 'no-store');
+		return buildJsonResponse({ error: 'アクセスが集中しています。しばらくして再度お試しください。' }, 429, baseHeaders);
+	}
+
+	const sortBy = url.searchParams.get('sort') === 'viewCount' ? 'viewCount' : 'date';
+	const rawMax = Number.parseInt(url.searchParams.get('max') ?? '6', 10);
+	const maxResults = Number.isFinite(rawMax) ? Math.min(12, Math.max(1, rawMax)) : 6;
+
+	try {
+		if (!YOUTUBE_API_KEY || !YOUTUBE_CHANNEL_ID) {
+			baseHeaders.set('Cache-Control', 'no-store');
+			return buildJsonResponse({ error: '現在動画を取得できません。' }, 503, baseHeaders);
+		}
+
+		const videos = await getCachedVideos();
+		const sorted = [...videos];
+		if (sortBy === 'viewCount') {
+			sorted.sort((a, b) => toSafeInt(b.viewCount) - toSafeInt(a.viewCount));
+		}
+
+		return buildJsonResponse({ videos: sorted.slice(0, maxResults) }, 200, baseHeaders);
+	} catch (error) {
+		console.error('YouTube API Error:', error);
+		baseHeaders.set('Cache-Control', 'no-store');
+		return buildJsonResponse({ error: '動画の取得に失敗しました。' }, 502, baseHeaders);
+	}
 };
