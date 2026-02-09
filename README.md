@@ -4,7 +4,7 @@
 
 # BOSS Personal Media
 
-Astro + React + Tailwind のサイトです。ブログ/イベントは **Astro Content Collections**（`src/content/**`）で管理し、`/admin` から投稿すると GitHub にコミットされます。
+Astro + React + Tailwind のサイトです。ブログ/イベントは **Astro Content Collections**（`src/content/**`）を GitHub リポジトリ上で直接更新して管理します。
 
 ## Run Locally
 
@@ -13,10 +13,7 @@ Astro + React + Tailwind のサイトです。ブログ/イベントは **Astro 
 
 1. Install dependencies:
    `npm install`
-2. Create `.env.local` (see `.env.example`) and set:
-   - `ADMIN_PASSWORD` (管理画面ログイン用)
-   - `GITHUB_TOKEN` (GitHub Contents API: contents read/write)
-   - optional: `GITHUB_REPO`, `GITHUB_BRANCH`
+2. Create `.env.local` (see `.env.example`) and set required values
 3. Run the app:
    `npm run dev`
 
@@ -25,4 +22,3 @@ Astro + React + Tailwind のサイトです。ブログ/イベントは **Astro 
 - Public site: `/`
 - Blog list: `/blog`
 - Blog detail: `/blog/{slug}`
-- Admin (CMS): `/admin`

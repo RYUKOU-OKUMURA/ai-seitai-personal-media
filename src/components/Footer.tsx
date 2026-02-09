@@ -34,11 +34,8 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           </div>
         </div>
         <div className="border-t border-gray-800 mt-10 pt-6">
-          <div className="flex justify-between text-sm text-gray-500 mb-2">
-            <span>© 2023 BOSS Personal Media. All rights reserved.</span>
-            <a className="cursor-pointer hover:text-gray-300 opacity-50" href="/admin">
-              Admin Login
-            </a>
+          <div className="text-sm text-gray-500 mb-2">
+            © 2023 BOSS Personal Media. All rights reserved.
           </div>
           <div className="text-xs text-gray-600">
             Font: LINE Seed JP by LINE Corporation
