@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { Resend } from 'resend';
+import { createTransport } from 'nodemailer';
 import { applyRateLimitHeaders, checkRateLimit, isSameOrigin } from '../../server/security';
 
 const CONTACT_RATE_LIMIT = {
@@ -112,51 +112,54 @@ export const POST: APIRoute = async ({ request, url }) => {
 			return buildJsonResponse({ error: 'ご相談内容の選択が不正です。' }, 400, baseHeaders);
 		}
 
-		const apiKey = import.meta.env.RESEND_API_KEY;
-		if (!apiKey) {
-			console.error('RESEND_API_KEY is not configured');
+		const gmailUser = import.meta.env.GMAIL_USER;
+		const gmailAppPassword = import.meta.env.GMAIL_APP_PASSWORD;
+		if (!gmailUser || !gmailAppPassword) {
+			console.error('GMAIL_USER or GMAIL_APP_PASSWORD is not configured');
 			return buildJsonResponse({ error: '現在お問い合わせを受け付けられません。' }, 503, baseHeaders);
 		}
+
+		const contactTo = import.meta.env.CONTACT_TO_EMAIL || gmailUser;
 
 		const safeName = escapeHtml(name);
 		const safeEmail = escapeHtml(email);
 		const safeMessage = message ? escapeHtml(message).replace(/\n/g, '<br>') : '（なし）';
 
-		const resend = new Resend(apiKey);
-		const { error } = await resend.emails.send({
-			from: 'お問い合わせフォーム <onboarding@resend.dev>',
-			to: 'okumura@physical-balance-lab.net',
-			replyTo: email,
-			subject: `【お問い合わせ】${categoryLabel} - ${name}様`,
-			html: `
-				<h2>ウェブサイトからのお問い合わせ</h2>
-				<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
-					<tr>
-						<td style="padding: 8px 12px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold; width: 140px;">お名前</td>
-						<td style="padding: 8px 12px; border: 1px solid #ddd;">${safeName}</td>
-					</tr>
-					<tr>
-						<td style="padding: 8px 12px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">メールアドレス</td>
-						<td style="padding: 8px 12px; border: 1px solid #ddd;">${safeEmail}</td>
-					</tr>
-					<tr>
-						<td style="padding: 8px 12px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">ご相談内容</td>
-						<td style="padding: 8px 12px; border: 1px solid #ddd;">${escapeHtml(categoryLabel)}</td>
-					</tr>
-					<tr>
-						<td style="padding: 8px 12px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">詳細メッセージ</td>
-						<td style="padding: 8px 12px; border: 1px solid #ddd;">${safeMessage}</td>
-					</tr>
-				</table>
-			`,
+		const transporter = createTransport({
+			service: 'gmail',
+			auth: { user: gmailUser, pass: gmailAppPassword },
 		});
 
-		if (error) {
-			const errorMessage =
-				typeof error === 'object' && error !== null && 'message' in error
-					? String((error as { message?: unknown }).message ?? 'unknown')
-					: 'unknown';
-			console.error('Resend error:', errorMessage);
+		try {
+			await transporter.sendMail({
+				from: `お問い合わせフォーム <${gmailUser}>`,
+				to: contactTo,
+				replyTo: email,
+				subject: `【お問い合わせ】${categoryLabel} - ${name}様`,
+				html: `
+					<h2>ウェブサイトからのお問い合わせ</h2>
+					<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+						<tr>
+							<td style="padding: 8px 12px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold; width: 140px;">お名前</td>
+							<td style="padding: 8px 12px; border: 1px solid #ddd;">${safeName}</td>
+						</tr>
+						<tr>
+							<td style="padding: 8px 12px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">メールアドレス</td>
+							<td style="padding: 8px 12px; border: 1px solid #ddd;">${safeEmail}</td>
+						</tr>
+						<tr>
+							<td style="padding: 8px 12px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">ご相談内容</td>
+							<td style="padding: 8px 12px; border: 1px solid #ddd;">${escapeHtml(categoryLabel)}</td>
+						</tr>
+						<tr>
+							<td style="padding: 8px 12px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">詳細メッセージ</td>
+							<td style="padding: 8px 12px; border: 1px solid #ddd;">${safeMessage}</td>
+						</tr>
+					</table>
+				`,
+			});
+		} catch (sendErr) {
+			console.error('Gmail SMTP error:', sendErr);
 			return buildJsonResponse({ error: 'メールの送信に失敗しました。' }, 502, baseHeaders);
 		}
 
