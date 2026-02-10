@@ -42,7 +42,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentRoute = 'home' }) =>
           {/* Logo */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={goHome}>
             <div className="size-8 text-primary bg-primary/10 rounded-lg flex items-center justify-center">
-              <span className="material-symbols-outlined text-2xl">neurology</span>
+              <img src="/favicon-32x32.png" alt="Logo" className="w-6 h-6 object-contain" />
             </div>
             <span className="text-[#111418] text-lg font-bold tracking-tight">整体院のAI仕組み化支援</span>
           </div>
