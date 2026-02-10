@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Analytics from '@vercel/analytics/astro';
 
 interface Props {
 	title: string;
@@ -54,5 +55,6 @@ const ogImage = rawOgImage
 		</head>
 	<body class="bg-background-light text-[#1F2937] text-[16.5px] md:text-[17px] antialiased overflow-x-hidden">
 		<slot />
+		<Analytics />
 	</body>
 </html>
