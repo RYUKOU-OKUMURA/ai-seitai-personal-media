@@ -1,0 +1,79 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getEntry } from 'astro:content';
+
+const slug = Astro.params.slug;
+const event = slug ? await getEntry('events', slug) : undefined;
+
+if (!event || event.data.draft) {
+	return Astro.redirect('/');
+}
+
+const { Content } = await event.render();
+---
+
+<Layout
+	title={`${event.data.title} | 整体院のAI仕組み化支援`}
+	description={`${event.data.dateLabel} 開催 - ${event.data.title}`}
+	ogImage={event.data.image}
+>
+	<main class="bg-white min-h-screen">
+		<header class="bg-background-light pt-20 pb-10 px-4 border-b border-gray-200">
+			<div class="max-w-[900px] mx-auto">
+				<a
+					href="/#events"
+					class="inline-flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-primary transition-colors"
+				>
+					<span class="material-symbols-outlined text-base">arrow_back</span>
+					イベント一覧に戻る
+				</a>
+
+				<div class="mt-6 inline-block px-3 py-1 bg-primary/10 text-primary rounded-sm text-xs font-bold">
+					{event.data.tag}
+				</div>
+				<h1 class="text-2xl md:text-4xl font-black text-[#111418] mt-4 leading-tight">{event.data.title}</h1>
+				<div class="flex items-center gap-2 text-gray-500 text-sm mt-4">
+					<span class="material-symbols-outlined text-base">calendar_month</span>
+					{event.data.dateLabel}
+				</div>
+			</div>
+		</header>
+
+		<section class="max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10 pb-20">
+			{event.data.image ? (
+				<div class="aspect-video w-full rounded-xl overflow-hidden shadow-lg mb-12 bg-gray-100">
+					<img src={event.data.image} alt={event.data.title} class="w-full h-full object-cover" />
+				</div>
+			) : null}
+
+			<article class="prose prose-lg max-w-none text-gray-700 leading-loose">
+				<Content />
+			</article>
+
+			{event.data.link && event.data.link !== '#' ? (
+				<div class="mt-12 text-center">
+					<a
+						href={event.data.link}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-flex items-center gap-2 bg-primary hover:bg-blue-600 text-white font-bold py-4 px-10 rounded-lg transition-all text-lg"
+					>
+						<span class="material-symbols-outlined">open_in_new</span>
+						申し込みページへ
+					</a>
+				</div>
+			) : null}
+
+			<div class="mt-16 bg-[#111921] text-white p-8 rounded-xl text-center">
+				<h2 class="text-xl font-bold mb-4">このイベントについて問い合わせる</h2>
+				<p class="text-gray-300 mb-6 text-sm">ご不明点やご質問は、お気軽にお問い合わせください。</p>
+				<a
+					href="/#contact"
+					class="inline-block bg-primary hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg transition-all"
+				>
+					お問い合わせ
+				</a>
+			</div>
+		</section>
+	</main>
+</Layout>

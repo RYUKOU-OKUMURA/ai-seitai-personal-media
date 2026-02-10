@@ -55,12 +55,14 @@ const EventBoard: React.FC<EventBoardProps> = ({ events }) => {
             className="flex overflow-x-auto gap-6 pb-8 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {events.map((event) => (
-              <a 
+            {events.map((event) => {
+              const isExternal = event.link && event.link !== '#';
+              const href = isExternal ? event.link : `/events/${event.slug}`;
+              return (
+              <a
                 key={event.slug}
-                href={event.link}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={href}
+                {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                 className="group relative flex-shrink-0 w-[280px] snap-start cursor-pointer"
               >
                 <div className="aspect-square rounded-xl overflow-hidden mb-4 relative shadow-md group-hover:shadow-xl transition-all duration-300 bg-gray-100">
@@ -77,7 +79,7 @@ const EventBoard: React.FC<EventBoardProps> = ({ events }) => {
                   </div>
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                   <div className="absolute bottom-4 right-4 bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 shadow-lg">
-                    <span className="material-symbols-outlined">arrow_outward</span>
+                    <span className="material-symbols-outlined">{isExternal ? 'arrow_outward' : 'arrow_forward'}</span>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -90,7 +92,8 @@ const EventBoard: React.FC<EventBoardProps> = ({ events }) => {
                   </h3>
                 </div>
               </a>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
