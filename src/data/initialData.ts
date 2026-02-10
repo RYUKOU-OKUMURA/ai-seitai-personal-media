@@ -1,4 +1,4 @@
-import type { CaseStudy } from './types';
+import type { CaseStudy } from '../types/core';
 
 export const INITIAL_CASE_STUDIES: CaseStudy[] = [
   {

@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import type { EventListItem } from '../types';
-import { normalizeSafeEventUrl } from '../utils/url-safety';
+import type { EventListItem } from '../../types/core';
+import { normalizeSafeEventUrl } from '../../utils/url-safety';
 
 interface EventBoardProps {
   events: EventListItem[];

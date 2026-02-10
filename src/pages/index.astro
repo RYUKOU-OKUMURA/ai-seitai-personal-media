@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import AppRoot from '../AppRoot';
+import AppRoot from '../components/core/AppRoot';
 import { getCollection } from 'astro:content';
 
 const events = (await getCollection('events', ({ data }) => !data.draft)).map((event) => ({

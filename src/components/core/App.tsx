@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import Navbar from './components/Navbar';
-import Home from './components/Home';
-import AiTrainingPage from './components/AiTrainingPage';
-import AiToolsPage from './components/AiToolsPage';
-import DxConsultingPage from './components/DxConsultingPage';
-import CaseStudyDetail from './components/CaseStudyDetail';
-import Footer from './components/Footer';
+import Navbar from '../common/Navbar';
+import Home from '../pages/Home';
+import AiTrainingPage from '../pages/AiTrainingPage';
+import AiToolsPage from '../pages/AiToolsPage';
+import DxConsultingPage from '../pages/DxConsultingPage';
+import CaseStudyDetail from '../features/CaseStudyDetail';
+import Footer from '../common/Footer';
 
 // Data Types
-import type { BlogPostListItem, EventListItem } from './types';
-import { INITIAL_CASE_STUDIES } from './initialData';
+import type { BlogPostListItem, EventListItem } from '../../types/core';
+import { INITIAL_CASE_STUDIES } from '../../data/initialData';
 
 interface AppProps {
   events: EventListItem[];

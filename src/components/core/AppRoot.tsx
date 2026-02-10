@@ -1,7 +1,7 @@
 import React from 'react';
 import App from './App';
-import ErrorBoundary from './components/ErrorBoundary';
-import type { BlogPostListItem, EventListItem } from './types';
+import ErrorBoundary from '../common/ErrorBoundary';
+import type { BlogPostListItem, EventListItem } from '../../types/core';
 
 interface AppRootProps {
   events: EventListItem[];

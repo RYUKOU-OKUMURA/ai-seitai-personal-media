@@ -1,16 +1,16 @@
 import React from 'react';
-import Hero from './Hero';
-import Stats from './Stats';
-import Checklist from './Checklist';
-import Philosophy from './Philosophy';
-import Services from './Services';
-import EventBoard from './EventBoard';
-import InternalBlog from './InternalBlog';
-import CaseStudies from './CaseStudies';
-import ContentHub from './ContentHub';
-import About from './About';
-import Contact from './Contact';
-import type { BlogPostListItem, EventListItem } from '../types';
+import Hero from '../common/Hero';
+import Stats from '../common/Stats';
+import Checklist from '../common/Checklist';
+import Philosophy from '../features/Philosophy';
+import Services from '../features/Services';
+import EventBoard from '../features/EventBoard';
+import InternalBlog from '../features/InternalBlog';
+import CaseStudies from '../features/CaseStudies';
+import ContentHub from '../features/ContentHub';
+import About from '../features/About';
+import Contact from '../features/Contact';
+import type { BlogPostListItem, EventListItem } from '../../types/core';
 
 interface HomeProps {
   onNavigate: (page: string, id?: number) => void;

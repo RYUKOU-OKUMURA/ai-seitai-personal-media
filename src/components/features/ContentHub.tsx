@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { YouTubeVideo } from '../types/youtube';
+import type { YouTubeVideo } from '../../types/youtube';
 
 const ContentHub: React.FC = () => {
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { BlogPostListItem } from '../types';
+import type { BlogPostListItem } from '../../types/core';
 
 interface InternalBlogProps {
   posts: BlogPostListItem[];

@@ -1,5 +1,5 @@
 import React from 'react';
-import { INITIAL_CASE_STUDIES } from '../initialData';
+import { INITIAL_CASE_STUDIES } from '../../data/initialData';
 
 interface CaseStudiesProps {
   onNavigate?: (page: string, id?: number) => void;
