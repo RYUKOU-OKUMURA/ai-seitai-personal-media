@@ -8,7 +8,10 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "typecheck": "tsc --noEmit",
+    "test:security": "node --test --experimental-strip-types tests/security.test.ts",
+    "test": "npm run typecheck && npm run test:security"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",

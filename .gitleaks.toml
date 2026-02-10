@@ -1,0 +1,13 @@
+title = "Project gitleaks config"
+
+[allowlist]
+description = "Allow non-sensitive placeholder values in sample env files"
+paths = [
+  '''.env.example''',
+]
+regexes = [
+  '''re_x+''',
+  '''your_[a-z_]+''',
+  '''xxxx_xxxx_xxxx_xxxx''',
+  '''replace_with_random_secret''',
+]

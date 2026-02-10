@@ -6,12 +6,12 @@ const About: React.FC = () => {
       <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-background-light rounded-2xl p-8 md:p-12 flex flex-col md:flex-row gap-10 items-center">
           <div className="w-48 h-48 md:w-64 md:h-64 shrink-0 rounded-full overflow-hidden border-4 border-white shadow-lg relative">
-            <div 
-              className="absolute inset-0 bg-gray-300 bg-cover bg-center" 
-              style={{ backgroundImage: "url('/images/profile.jpg')" }}
-              role="img"
-              aria-label="Portrait of a confident asian male professional"
-            ></div>
+            <img
+              src="/images/profile.jpg"
+              alt="Portrait of a confident asian male professional"
+              className="absolute inset-0 w-full h-full object-cover bg-gray-300"
+              loading="lazy"
+            />
           </div>
           <div className="flex-1 text-center md:text-left">
             <h2 className="text-2xl font-black text-[#111418] mb-2">奥村 龍晃（おくむら りゅうこう）</h2>

@@ -19,7 +19,7 @@
         },
         "link": {
           "type": "string",
-          "default": ""
+          "default": "#"
         },
         "draft": {
           "type": "boolean",

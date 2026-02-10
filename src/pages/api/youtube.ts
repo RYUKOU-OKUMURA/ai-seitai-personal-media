@@ -190,7 +190,7 @@ export const GET: APIRoute = async ({ request, url }) => {
 		'Cache-Control': 'public, max-age=60, s-maxage=600, stale-while-revalidate=120',
 	});
 
-	const rateLimit = checkRateLimit(request, YOUTUBE_RATE_LIMIT);
+	const rateLimit = await checkRateLimit(request, YOUTUBE_RATE_LIMIT);
 	applyRateLimitHeaders(baseHeaders, rateLimit);
 	if (!rateLimit.allowed) {
 		baseHeaders.set('Cache-Control', 'no-store');

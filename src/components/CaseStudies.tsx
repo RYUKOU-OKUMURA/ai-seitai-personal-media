@@ -28,12 +28,14 @@ const CaseStudies: React.FC<CaseStudiesProps> = ({ onNavigate }) => {
               className="bg-white rounded-xl overflow-hidden flex flex-col shadow-sm hover:shadow-lg transition-all border border-gray-100 group cursor-pointer h-full"
               onClick={() => onNavigate && onNavigate('case-detail', study.id)}
             >
-              <div 
-                className="w-full h-48 bg-gray-200 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" 
-                style={{ backgroundImage: `url('${study.images[0]}')` }}
-                role="img"
-                aria-label={study.title}
-              ></div>
+              <div className="w-full h-48 bg-gray-200 overflow-hidden">
+                <img
+                  src={study.images[0]}
+                  alt={study.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+              </div>
               <div className="p-6 flex flex-col flex-grow">
                 <div className="text-xs text-gray-500 mb-2 flex items-center gap-2">
                   {study.date && <span className="font-bold">{study.date}</span>}

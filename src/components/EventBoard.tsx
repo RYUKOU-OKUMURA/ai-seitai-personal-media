@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import type { EventListItem } from '../types';
+import { normalizeSafeEventUrl } from '../utils/url-safety';
 
 interface EventBoardProps {
   events: EventListItem[];
@@ -52,12 +53,12 @@ const EventBoard: React.FC<EventBoardProps> = ({ events }) => {
           /* Scroll Container */
           <div 
             ref={scrollRef}
-            className="flex overflow-x-auto gap-6 pb-8 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            className="flex overflow-x-auto gap-6 pb-8 -mx-4 px-4 sm:mx-0 sm:px-0 hide-scrollbar snap-x snap-mandatory"
           >
             {events.map((event) => {
-              const isExternal = event.link && event.link !== '#';
-              const href = isExternal ? event.link : `/events/${event.slug}`;
+              const normalizedLink = normalizeSafeEventUrl(event.link);
+              const isExternal = Boolean(normalizedLink && normalizedLink !== '#');
+              const href = normalizedLink && normalizedLink !== '#' ? normalizedLink : '#events';
               return (
               <a
                 key={event.slug}

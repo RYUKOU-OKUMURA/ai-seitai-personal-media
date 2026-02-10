@@ -119,16 +119,16 @@ const ContentHub: React.FC = () => {
             </h3>
             <div className="space-y-4">
               <iframe
-                className="note-embed"
+                className="note-embed-frame"
                 src="https://note.com/embed/notes/n01666893b41b"
-                style={{ border: 0, display: 'block', maxWidth: '99%', width: '100%', padding: 0, margin: 0 }}
                 height="230"
+                title="note embed 1"
               ></iframe>
               <iframe
-                className="note-embed"
+                className="note-embed-frame"
                 src="https://note.com/embed/notes/nd1e3fb5c79c8"
-                style={{ border: 0, display: 'block', maxWidth: '99%', width: '100%', padding: 0, margin: 0 }}
                 height="230"
+                title="note embed 2"
               ></iframe>
             </div>
           </div>

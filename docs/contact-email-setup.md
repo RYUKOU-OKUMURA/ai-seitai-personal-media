@@ -1,131 +1,57 @@
-# お問い合わせフォーム メール設定ガイド
+# お問い合わせフォーム セキュア運用ガイド
 
 ## 概要
 
-ウェブサイトのお問い合わせフォームから送信された内容を、Nodemailer + Gmail SMTP 経由で指定のメールアドレスに届ける仕組み。
+現在の問い合わせ導線は以下の構成です。
 
-## 構成
-
-```
-訪問者がフォーム送信
-  → /api/contact (Astro API Route)
-  → Nodemailer (Gmail SMTP)
-  → 指定のGmailアドレスに受信
-  → reply-to に訪問者のアドレスが入るのでGmailから直接返信可能
-```
-
-## 技術スタック
-
-- **フレームワーク:** Astro (SSR, Vercel アダプター)
-- **メール送信:** Nodemailer + Gmail SMTP
-- **ホスティング:** Vercel
-- **パッケージ:** `nodemailer`, `@types/nodemailer` (devDependencies)
+1. フロント (`Contact.tsx`) で Turnstile を表示
+2. `/api/contact` で以下を検証
+   - strict Origin
+   - CAPTCHA
+   - 分散レート制限 (Upstash Redis)
+   - idempotencyKey
+3. メール送信は Gmail -> Resend の順でフェイルオーバー
+4. 両方失敗時は Redis キューに積み、`/api/contact-retry` で再送
 
 ## 環境変数
 
-| 変数名 | 説明 | 例 |
-|--------|------|-----|
-| `GMAIL_USER` | Gmail SMTPの認証に使うGoogleアカウント | `okumura@physical-balance-lab.net` |
-| `GMAIL_APP_PASSWORD` | Googleアプリパスワード（16文字） | `abcdefghijklmnop` |
-| `CONTACT_TO_EMAIL` | メールの送信先（省略時は`GMAIL_USER`宛） | `okumura@physical-balance-lab.net` |
+`.env.example` の値を本番値で設定してください。
 
-### 設定場所
+| 変数名 | 用途 |
+|---|---|
+| `SITE_URL`, `PUBLIC_SITE_URL` | オリジン判定の基準URL |
+| `CONTACT_TO_EMAIL` | 問い合わせ受信先 |
+| `TURNSTILE_SITE_KEY` | Turnstile site key (サーバー保持) |
+| `PUBLIC_TURNSTILE_SITE_KEY` | Turnstile site key (クライアント公開) |
+| `TURNSTILE_SECRET_KEY` | Turnstile secret key |
+| `UPSTASH_REDIS_REST_URL` | Redis REST URL |
+| `UPSTASH_REDIS_REST_TOKEN` | Redis REST token |
+| `GMAIL_USER`, `GMAIL_APP_PASSWORD` | 一次送信経路 (Gmail SMTP) |
+| `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | 二次送信経路 (Resend) |
+| `RESEND_DEFAULT_TO_EMAIL` | `CONTACT_TO_EMAIL` 未設定時の送信先 |
+| `CONTACT_RETRY_CRON_SECRET` or `CRON_SECRET` | `/api/contact-retry` 認証 |
 
-- **ローカル開発:** `.env.local` に記載
-- **本番（Vercel）:** Vercel ダッシュボード → Settings → Environment Variables
+## レート制限仕様
 
-## Googleアプリパスワードの発行手順
+- IP: `5 req / 10 min`
+- IP + email-hash: `3 req / 10 min`
+- global: `100 req / 1 min`
 
-1. https://myaccount.google.com/apppasswords にアクセス
-2. 送信に使うGoogleアカウントでログイン
-3. アプリ名を入力（例: 「お問い合わせフォーム」）
-4. 「作成」をクリック
-5. 表示された16文字のパスワードをコピー（スペースは除去して使用）
+実装: `src/server/security.ts`
 
-**前提条件:** Googleアカウントで2段階認証が有効になっていること
+## 再送キュー仕様
 
-## ファイル構成
+- キュー名: `contact:retry:queue:v1`
+- 失敗時: `LPUSH`
+- 再送 API: `/api/contact-retry`
+- 最大試行回数: 5回
 
-```
-src/
-├── components/
-│   └── Contact.tsx          # フォームUI（React）
-├── pages/
-│   └── api/
-│       └── contact.ts       # APIエンドポイント（メール送信処理）
-└── server/
-    └── security.ts          # レート制限・セキュリティ
-```
+Vercel cron は `vercel.json` で5分間隔で実行。
 
-## セキュリティ機能
+## 運用チェックリスト
 
-- **レート制限:** 10分間に5回まで（IPアドレス単位）
-- **CORS検証:** 同一オリジンのみ許可
-- **ハニーポット:** bot対策の隠しフィールド
-- **フォーム入力時間チェック:** 800ms未満 or 24時間超は拒否
-- **入力サニタイズ:** HTMLエスケープ、文字数制限
-- **メールバリデーション:** 正規表現による形式チェック
-
-## 横展開時の手順
-
-### 1. パッケージインストール
-
-```bash
-npm install nodemailer
-npm install --save-dev @types/nodemailer
-```
-
-### 2. APIエンドポイント作成
-
-`src/pages/api/contact.ts` を参照。主要部分:
-
-```typescript
-import { createTransport } from 'nodemailer';
-
-const transporter = createTransport({
-  service: 'gmail',
-  auth: {
-    user: import.meta.env.GMAIL_USER,
-    pass: import.meta.env.GMAIL_APP_PASSWORD,
-  },
-});
-
-await transporter.sendMail({
-  from: `お問い合わせフォーム <${gmailUser}>`,
-  to: contactTo,
-  replyTo: visitorEmail,  // 訪問者のメールアドレス
-  subject: '件名',
-  html: 'HTML本文',
-});
-```
-
-### 3. 環境変数設定
-
-- ローカル: `.env.local` に `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `CONTACT_TO_EMAIL` を設定
-- Vercel: ダッシュボードの Environment Variables に同じ値を設定
-- 設定後、Vercel で Redeploy が必要
-
-### 4. Astro設定（SSR必須）
-
-お問い合わせAPIはサーバーサイドで動くため、Astro の output を `server` または `hybrid` にする必要がある。
-
-## Resendではなく Nodemailer + Gmail を選んだ理由
-
-| 項目 | Resend | Nodemailer + Gmail |
-|------|--------|--------------------|
-| ドメイン認証 | 必要（任意宛先に送る場合） | 不要 |
-| 外部アカウント | Resendアカウント必須 | Googleアカウントのみ |
-| 無料枠 | 3,000通/月 | 500通/日 |
-| 送信先の制限 | 未認証だとアカウント宛のみ | 制限なし |
-| DNS設定 | DKIM/SPF/MXレコード必要 | 不要 |
-
-個人サイトのお問い合わせフォーム程度であれば Nodemailer + Gmail で十分。
-
-## トラブルシューティング
-
-| エラーメッセージ | 原因 | 対処 |
-|----------------|------|------|
-| 現在お問い合わせを受け付けられません | 環境変数が未設定 | `GMAIL_USER`と`GMAIL_APP_PASSWORD`を確認 |
-| メールの送信に失敗しました | SMTP認証エラー | アプリパスワードが正しいか確認、2段階認証が有効か確認 |
-| 送信成功だがメールが届かない | 送信先のMXレコード未設定 | `@gmail.com`アドレスに送るか、ドメインのMXレコードを設定 |
-| 迷惑メールに振り分けられる | 送信元の信頼性が低い | 迷惑メールフォルダを確認、送信元をフィルタで許可 |
+1. Turnstileの site/secret が本番に設定されている
+2. Upstash Redis が接続可能
+3. Gmail と Resend 両方の資格情報が有効
+4. `CRON_SECRET` (または `CONTACT_RETRY_CRON_SECRET`) を設定済み
+5. `security-checks` (gitleaks) がCIで有効

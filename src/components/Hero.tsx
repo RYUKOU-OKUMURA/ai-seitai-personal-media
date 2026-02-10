@@ -42,11 +42,11 @@ const Hero: React.FC = () => {
         <div className="lg:hidden flex flex-col gap-8">
           <TextContent />
           <div className="relative w-full h-[400px] rounded-2xl overflow-hidden shadow-2xl">
-            <div 
-              className="absolute inset-0 bg-gray-100 bg-cover bg-center" 
-              style={{ backgroundImage: "url('/images/Clean_up_the_bottom_right_corner_area_by_removing_-1770191603164.png')" }}
-              role="img"
-              aria-label="Professional meeting in a modern bright office discussing business strategy on a tablet"
+            <img
+              className="absolute inset-0 w-full h-full object-cover bg-gray-100"
+              src="/images/Clean_up_the_bottom_right_corner_area_by_removing_-1770191603164.png"
+              alt="Professional meeting in a modern bright office discussing business strategy on a tablet"
+              loading="eager"
             />
           </div>
         </div>
@@ -55,13 +55,11 @@ const Hero: React.FC = () => {
         <div className="hidden lg:block relative">
           <div className="relative flex justify-end">
             <div className="relative w-[80%] xl:w-[75%] h-[600px] xl:h-[700px] rounded-2xl overflow-hidden shadow-2xl">
-              <div 
-                className="absolute inset-0 bg-gray-100 bg-cover bg-center" 
-                style={{ 
-                  backgroundImage: "url('/images/Clean_up_the_bottom_right_corner_area_by_removing_-1770191603164.png')"
-                }}
-                role="img"
-                aria-label="Professional meeting in a modern bright office discussing business strategy on a tablet"
+              <img
+                className="absolute inset-0 w-full h-full object-cover bg-gray-100"
+                src="/images/Clean_up_the_bottom_right_corner_area_by_removing_-1770191603164.png"
+                alt="Professional meeting in a modern bright office discussing business strategy on a tablet"
+                loading="eager"
               />
             </div>
           </div>

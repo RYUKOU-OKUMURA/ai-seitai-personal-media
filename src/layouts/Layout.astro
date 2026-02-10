@@ -1,4 +1,6 @@
 ---
+import '../styles/global.css';
+
 interface Props {
 	title: string;
 	description?: string;
@@ -40,45 +42,16 @@ const ogImage = rawOgImage
 
 		<!-- Twitter Card -->
 		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:title" content={title} />
-		<meta name="twitter:description" content={description} />
-		<meta name="twitter:image" content={ogImage} />
-        
-        <!-- LINESeedJP Font -->
-        <style>
-            @font-face {
-                font-family: 'LINE Seed JP';
-                src: url('/fonts/LINESeedJP_OTF_Th.woff2') format('woff2');
-                font-weight: 100;
-                font-style: normal;
-                font-display: swap;
-            }
-            @font-face {
-                font-family: 'LINE Seed JP';
-                src: url('/fonts/LINESeedJP_OTF_Rg.woff2') format('woff2');
-                font-weight: 400;
-                font-style: normal;
-                font-display: swap;
-            }
-            @font-face {
-                font-family: 'LINE Seed JP';
-                src: url('/fonts/LINESeedJP_OTF_Bd.woff2') format('woff2');
-                font-weight: 700;
-                font-style: normal;
-                font-display: swap;
-            }
-            @font-face {
-                font-family: 'LINE Seed JP';
-                src: url('/fonts/LINESeedJP_OTF_Eb.woff2') format('woff2');
-                font-weight: 900;
-                font-style: normal;
-                font-display: swap;
-            }
-        </style>
-        
-        <!-- Material Symbols -->
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-	</head>
+			<meta name="twitter:title" content={title} />
+			<meta name="twitter:description" content={description} />
+			<meta name="twitter:image" content={ogImage} />
+
+			<!-- Material Symbols -->
+			<link
+				href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+				rel="stylesheet"
+			/>
+		</head>
 	<body class="bg-background-light text-[#1F2937] text-[16.5px] md:text-[17px] antialiased overflow-x-hidden">
 		<slot />
 	</body>

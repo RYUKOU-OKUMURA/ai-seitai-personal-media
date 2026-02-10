@@ -2,9 +2,23 @@
 /// <reference types="astro/client" />
 
 interface ImportMetaEnv {
-  readonly RESEND_API_KEY: string;
-  readonly YOUTUBE_API_KEY: string;
-  readonly YOUTUBE_CHANNEL_ID: string;
+  readonly GMAIL_USER?: string;
+  readonly GMAIL_APP_PASSWORD?: string;
+  readonly CONTACT_TO_EMAIL?: string;
+  readonly CONTACT_RETRY_CRON_SECRET?: string;
+  readonly CRON_SECRET?: string;
+  readonly RESEND_API_KEY?: string;
+  readonly RESEND_FROM_EMAIL?: string;
+  readonly RESEND_DEFAULT_TO_EMAIL?: string;
+  readonly TURNSTILE_SECRET_KEY?: string;
+  readonly TURNSTILE_SITE_KEY?: string;
+  readonly PUBLIC_TURNSTILE_SITE_KEY?: string;
+  readonly UPSTASH_REDIS_REST_URL?: string;
+  readonly UPSTASH_REDIS_REST_TOKEN?: string;
+  readonly SITE_URL?: string;
+  readonly PUBLIC_SITE_URL?: string;
+  readonly YOUTUBE_API_KEY?: string;
+  readonly YOUTUBE_CHANNEL_ID?: string;
 }
 
 interface ImportMeta {

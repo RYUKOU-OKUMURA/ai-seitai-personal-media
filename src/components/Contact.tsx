@@ -1,14 +1,51 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
+declare global {
+  interface Window {
+    turnstile?: {
+      reset: (selector?: string) => void;
+    };
+  }
+}
+
+const TURNSTILE_SCRIPT_ID = 'turnstile-api-script';
+
+const createIdempotencyKey = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 14)}`;
+};
 
 const Contact: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [submittedAt, setSubmittedAt] = useState(() => Date.now().toString());
+  const [idempotencyKey, setIdempotencyKey] = useState(() => createIdempotencyKey());
+  const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
+
+  useEffect(() => {
+    if (!turnstileSiteKey) return;
+    if (document.getElementById(TURNSTILE_SCRIPT_ID)) return;
+
+    const script = document.createElement('script');
+    script.id = TURNSTILE_SCRIPT_ID;
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+  }, [turnstileSiteKey]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus('sending');
     setErrorMessage('');
+
+    if (!turnstileSiteKey) {
+      setErrorMessage('現在フォーム送信を受け付けていません。しばらくして再度お試しください。');
+      setStatus('error');
+      return;
+    }
 
     const form = e.currentTarget;
     const formData = new FormData(form);
@@ -19,6 +56,8 @@ const Contact: React.FC = () => {
       message: formData.get('message') as string,
       website: formData.get('website') as string,
       submittedAt: formData.get('submittedAt') as string,
+      idempotencyKey: formData.get('idempotencyKey') as string,
+      captchaToken: formData.get('cf-turnstile-response') as string,
     };
 
     try {
@@ -32,14 +71,21 @@ const Contact: React.FC = () => {
         setStatus('success');
         form.reset();
         setSubmittedAt(Date.now().toString());
+        setIdempotencyKey(createIdempotencyKey());
+        if (window.turnstile?.reset) window.turnstile.reset();
       } else {
-        const result = await res.json();
+        const result = (await res.json()) as { error?: string; errorCode?: string };
         setErrorMessage(result.error || '送信に失敗しました。');
         setStatus('error');
+        setIdempotencyKey(createIdempotencyKey());
+        if (result.errorCode === 'INVALID_CAPTCHA' && window.turnstile?.reset) {
+          window.turnstile.reset();
+        }
       }
     } catch {
       setErrorMessage('ネットワークエラーが発生しました。');
       setStatus('error');
+      if (window.turnstile?.reset) window.turnstile.reset();
     }
   };
 
@@ -67,12 +113,13 @@ const Contact: React.FC = () => {
             </button>
           </div>
         ) : (
-          <form className="bg-white p-8 md:p-10 rounded-xl shadow-lg border border-gray-100 space-y-6" onSubmit={handleSubmit}>
-            <input type="hidden" name="submittedAt" value={submittedAt} readOnly />
-            <div className="hidden" aria-hidden="true">
-              <label htmlFor="website">Website</label>
-              <input id="website" name="website" type="text" autoComplete="off" tabIndex={-1} />
-            </div>
+	          <form className="bg-white p-8 md:p-10 rounded-xl shadow-lg border border-gray-100 space-y-6" onSubmit={handleSubmit}>
+	            <input type="hidden" name="submittedAt" value={submittedAt} readOnly />
+	            <input type="hidden" name="idempotencyKey" value={idempotencyKey} readOnly />
+	            <div className="hidden" aria-hidden="true">
+	              <label htmlFor="website">Website</label>
+	              <input id="website" name="website" type="text" autoComplete="off" tabIndex={-1} />
+	            </div>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-bold text-[#111418]" htmlFor="name">お名前 <span className="text-red-500">*</span></label>
@@ -124,20 +171,32 @@ const Contact: React.FC = () => {
               ></textarea>
             </div>
 
-            {status === 'error' && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
-                {errorMessage}
-              </div>
-            )}
+	            {status === 'error' && (
+	              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
+	                {errorMessage}
+	              </div>
+	            )}
 
-            <button
-              className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg shadow-blue-200 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              type="submit"
-              disabled={status === 'sending'}
-            >
-              {status === 'sending' ? '送信中...' : '送信する'}
-            </button>
-          </form>
+	            {turnstileSiteKey ? (
+	              <div
+	                className="cf-turnstile"
+	                data-sitekey={turnstileSiteKey}
+	                data-language="ja"
+	              />
+	            ) : (
+	              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-yellow-800 text-sm">
+	                セキュリティ設定を確認中のため、現在フォーム送信を一時停止しています。
+	              </div>
+	            )}
+
+	            <button
+	              className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg shadow-blue-200 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+	              type="submit"
+	              disabled={status === 'sending' || !turnstileSiteKey}
+	            >
+	              {status === 'sending' ? '送信中...' : '送信する'}
+	            </button>
+	          </form>
         )}
         <p className="text-center text-xs text-gray-500 leading-relaxed mt-6">
           ※ 送信いただいた情報は、お問い合わせ対応以外の目的には使用いたしません。<br />
