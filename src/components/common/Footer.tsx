@@ -11,7 +11,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         <div className="flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate && onNavigate('home')}>
             <div className="size-8 text-white bg-white/10 rounded-lg flex items-center justify-center">
-              <span className="material-symbols-outlined text-2xl">neurology</span>
+              <img src="/favicon-32x32.png" alt="Logo" className="w-6 h-6 object-contain" />
             </div>
             <span className="text-xl font-bold tracking-tight">整体院のAI仕組み化支援</span>
           </div>
