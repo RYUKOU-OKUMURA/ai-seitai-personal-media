@@ -1,14 +1,4 @@
-import React, { useEffect, useState } from 'react';
-
-declare global {
-  interface Window {
-    turnstile?: {
-      reset: (selector?: string) => void;
-    };
-  }
-}
-
-const TURNSTILE_SCRIPT_ID = 'turnstile-api-script';
+import React, { useState } from 'react';
 
 const createIdempotencyKey = (): string => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -22,30 +12,11 @@ const Contact: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [submittedAt, setSubmittedAt] = useState(() => Date.now().toString());
   const [idempotencyKey, setIdempotencyKey] = useState(() => createIdempotencyKey());
-  const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
-
-  useEffect(() => {
-    if (!turnstileSiteKey) return;
-    if (document.getElementById(TURNSTILE_SCRIPT_ID)) return;
-
-    const script = document.createElement('script');
-    script.id = TURNSTILE_SCRIPT_ID;
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
-  }, [turnstileSiteKey]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus('sending');
     setErrorMessage('');
-
-    if (!turnstileSiteKey) {
-      setErrorMessage('現在フォーム送信を受け付けていません。しばらくして再度お試しください。');
-      setStatus('error');
-      return;
-    }
 
     const form = e.currentTarget;
     const formData = new FormData(form);
@@ -57,7 +28,6 @@ const Contact: React.FC = () => {
       website: formData.get('website') as string,
       submittedAt: formData.get('submittedAt') as string,
       idempotencyKey: formData.get('idempotencyKey') as string,
-      captchaToken: formData.get('cf-turnstile-response') as string,
     };
 
     try {
@@ -72,20 +42,15 @@ const Contact: React.FC = () => {
         form.reset();
         setSubmittedAt(Date.now().toString());
         setIdempotencyKey(createIdempotencyKey());
-        if (window.turnstile?.reset) window.turnstile.reset();
       } else {
-        const result = (await res.json()) as { error?: string; errorCode?: string };
+        const result = (await res.json()) as { error?: string };
         setErrorMessage(result.error || '送信に失敗しました。');
         setStatus('error');
         setIdempotencyKey(createIdempotencyKey());
-        if (result.errorCode === 'INVALID_CAPTCHA' && window.turnstile?.reset) {
-          window.turnstile.reset();
-        }
       }
     } catch {
       setErrorMessage('ネットワークエラーが発生しました。');
       setStatus('error');
-      if (window.turnstile?.reset) window.turnstile.reset();
     }
   };
 
@@ -177,22 +142,10 @@ const Contact: React.FC = () => {
 	              </div>
 	            )}
 
-	            {turnstileSiteKey ? (
-	              <div
-	                className="cf-turnstile"
-	                data-sitekey={turnstileSiteKey}
-	                data-language="ja"
-	              />
-	            ) : (
-	              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-yellow-800 text-sm">
-	                セキュリティ設定を確認中のため、現在フォーム送信を一時停止しています。
-	              </div>
-	            )}
-
 	            <button
 	              className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg shadow-blue-200 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
 	              type="submit"
-	              disabled={status === 'sending' || !turnstileSiteKey}
+	              disabled={status === 'sending'}
 	            >
 	              {status === 'sending' ? '送信中...' : '送信する'}
 	            </button>

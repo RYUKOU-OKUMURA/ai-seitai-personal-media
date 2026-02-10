@@ -43,13 +43,10 @@ const MAX_NAME_LENGTH = 80;
 const MAX_EMAIL_LENGTH = 254;
 const MAX_MESSAGE_LENGTH = 2_000;
 const MAX_IDEMPOTENCY_KEY_LENGTH = 128;
-const MAX_CAPTCHA_TOKEN_LENGTH = 2_000;
 const MIN_FORM_FILL_MS = 800;
 const MAX_FORM_AGE_MS = 24 * 60 * 60 * 1000;
 const IDEMPOTENCY_TTL_MS = 24 * 60 * 60 * 1000;
-const TURNSTILE_VERIFY_TIMEOUT_MS = 8_000;
-
-export type ContactErrorCode = 'INVALID_CAPTCHA' | 'RATE_LIMITED' | 'UNSUPPORTED_ORIGIN' | 'SEND_FAILED';
+export type ContactErrorCode = 'RATE_LIMITED' | 'UNSUPPORTED_ORIGIN' | 'SEND_FAILED';
 
 type ContactErrorResponse = {
 	error: string;
@@ -107,35 +104,6 @@ const buildJsonResponse = <T>(body: T, status: number, baseHeaders: Headers): Re
 
 const buildErrorResponse = (message: string, status: number, errorCode: ContactErrorCode, baseHeaders: Headers): Response =>
 	buildJsonResponse<ContactErrorResponse>({ error: message, errorCode }, status, baseHeaders);
-
-const verifyTurnstileToken = async (token: string, remoteIp: string): Promise<boolean> => {
-	const secret = import.meta.env.TURNSTILE_SECRET_KEY?.trim();
-	if (!secret || !token) return false;
-
-	const controller = new AbortController();
-	const timeoutId = setTimeout(() => controller.abort(), TURNSTILE_VERIFY_TIMEOUT_MS);
-	try {
-		const formBody = new URLSearchParams();
-		formBody.set('secret', secret);
-		formBody.set('response', token);
-		if (remoteIp && remoteIp !== 'unknown') {
-			formBody.set('remoteip', remoteIp);
-		}
-
-		const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-			body: formBody.toString(),
-			signal: controller.signal,
-		});
-
-		if (!response.ok) return false;
-		const data = (await response.json()) as { success?: boolean };
-		return data.success === true;
-	} finally {
-		clearTimeout(timeoutId);
-	}
-};
 
 export const POST: APIRoute = async ({ request, url }) => {
 	const baseHeaders = new Headers({
@@ -202,7 +170,6 @@ export const POST: APIRoute = async ({ request, url }) => {
 		const message = trimAndLimit(body.message, MAX_MESSAGE_LENGTH);
 		const website = trimAndLimit(body.website, 120);
 		const submittedAt = trimAndLimit(body.submittedAt, 20);
-		const captchaToken = trimAndLimit(body.captchaToken, MAX_CAPTCHA_TOKEN_LENGTH);
 		const idempotencyKey = trimAndLimit(body.idempotencyKey, MAX_IDEMPOTENCY_KEY_LENGTH);
 
 		if (website) {
@@ -215,7 +182,7 @@ export const POST: APIRoute = async ({ request, url }) => {
 			return buildErrorResponse('入力内容を確認してください。', 400, 'SEND_FAILED', baseHeaders);
 		}
 
-		if (!name || !email || !category || !captchaToken || !idempotencyKey) {
+		if (!name || !email || !category || !idempotencyKey) {
 			return buildErrorResponse('必須項目を入力してください。', 400, 'SEND_FAILED', baseHeaders);
 		}
 		if (!EMAIL_REGEX.test(email)) {
@@ -240,17 +207,6 @@ export const POST: APIRoute = async ({ request, url }) => {
 				meta: { clientIp: maskIp(clientIp), email: maskContactEmail(email) },
 			});
 			return buildErrorResponse('送信回数が上限に達しました。時間をおいて再度お試しください。', 429, 'RATE_LIMITED', baseHeaders);
-		}
-
-		const captchaOk = await verifyTurnstileToken(captchaToken, clientIp);
-		if (!captchaOk) {
-			logSecurityEvent({
-				level: 'warn',
-				event: 'contact.captcha.invalid',
-				message: 'Blocked request due to invalid captcha.',
-				meta: { clientIp: maskIp(clientIp), email: maskContactEmail(email) },
-			});
-			return buildErrorResponse('CAPTCHA認証に失敗しました。', 403, 'INVALID_CAPTCHA', baseHeaders);
 		}
 
 		const isFirstSubmission = await reserveIdempotencyKey('contact:idempotency:v1', idempotencyKey, IDEMPOTENCY_TTL_MS);
