@@ -9,8 +9,11 @@ const SITE_URL = 'https://ai-seitai-dx-media.vercel.app';
 const DEFAULT_DESCRIPTION = 'AIと歩む、次世代の治療院経営';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/images/ogp.jpg`;
 
-const { title, description = DEFAULT_DESCRIPTION, ogImage = DEFAULT_OG_IMAGE } = Astro.props;
+const { title, description = DEFAULT_DESCRIPTION, ogImage: rawOgImage } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, SITE_URL).href;
+const ogImage = rawOgImage
+	? rawOgImage.startsWith('http') ? rawOgImage : `${SITE_URL}${rawOgImage}`
+	: DEFAULT_OG_IMAGE;
 ---
 
 <!doctype html>

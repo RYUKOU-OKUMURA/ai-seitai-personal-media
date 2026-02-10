@@ -21,7 +21,11 @@ if (!post || post.data.draft) {
 const { Content } = await post.render();
 ---
 
-<Layout title={`${post.data.title} | 整体院のAI仕組み化支援`}>
+<Layout
+	title={`${post.data.title} | 整体院のAI仕組み化支援`}
+	description={post.data.excerpt}
+	ogImage={post.data.image}
+>
 	<main class="bg-white min-h-screen">
 		<header class="bg-background-light pt-20 pb-10 px-4 border-b border-gray-200">
 			<div class="max-w-[900px] mx-auto">
