@@ -17,8 +17,8 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           </div>
           <div className="flex gap-8 text-sm font-medium text-gray-400">
             <a className="hover:text-white transition-colors cursor-pointer" onClick={() => onNavigate && onNavigate('home')}>サービス一覧</a>
-            <a className="hover:text-white transition-colors cursor-pointer">プライバシーポリシー</a>
-            <a className="hover:text-white transition-colors cursor-pointer">特定商取引法に基づく表記</a>
+            <a href="/privacy-policy" className="hover:text-white transition-colors">プライバシーポリシー</a>
+            <a href="/legal-notice" className="hover:text-white transition-colors">特定商取引法に基づく表記</a>
           </div>
           <div className="flex gap-4">
             <a className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors cursor-pointer">
