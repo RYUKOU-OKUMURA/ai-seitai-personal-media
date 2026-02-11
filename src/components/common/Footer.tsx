@@ -35,7 +35,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         </div>
         <div className="border-t border-gray-800 mt-10 pt-6">
           <div className="text-sm text-gray-500 mb-2">
-            © 2023 BOSS Personal Media. All rights reserved.
+            © 2026 RYUKOU OKUMURA Personal Media. All rights reserved.
           </div>
           <div className="text-xs text-gray-600">
             Font: LINE Seed JP by LINE Corporation
