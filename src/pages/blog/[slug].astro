@@ -60,7 +60,15 @@ const { Content } = await post.render();
 
 			<article class="max-w-none text-gray-700 leading-loose">
 				<p class="font-bold text-xl leading-relaxed mb-10">{post.data.excerpt}</p>
-				<div class="prose prose-lg max-w-none text-gray-700">
+				<div class="
+					prose prose-lg max-w-none
+					prose-headings:font-black prose-headings:text-[#111418]
+					prose-h2:text-xl prose-h2:md:text-2xl prose-h2:mt-14 prose-h2:mb-6 prose-h2:border-l-4 prose-h2:border-primary prose-h2:pl-4
+					prose-p:text-gray-700 prose-p:leading-[2] prose-p:mb-6
+					prose-strong:text-[#111418] prose-strong:font-bold
+					prose-ol:my-8 prose-ol:pl-6 prose-li:my-3 prose-li:leading-[2]
+					prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+				">
 					<Content />
 				</div>
 			</article>

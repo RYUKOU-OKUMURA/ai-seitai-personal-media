@@ -17,6 +17,7 @@
     "@astrojs/react": "^4.4.2",
     "@astrojs/tailwind": "^6.0.2",
     "@astrojs/vercel": "^8.0.0",
+    "@tailwindcss/typography": "^0.5.19",
     "@vercel/analytics": "^1.6.1",
     "astro": "^5.17.1",
     "jose": "^6.1.3",

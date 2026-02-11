@@ -58,7 +58,7 @@ const EventBoard: React.FC<EventBoardProps> = ({ events }) => {
             {events.map((event) => {
               const normalizedLink = normalizeSafeEventUrl(event.link);
               const isExternal = Boolean(normalizedLink && normalizedLink !== '#');
-              const href = normalizedLink && normalizedLink !== '#' ? normalizedLink : '#events';
+              const href = isExternal ? normalizedLink! : `/events/${encodeURIComponent(event.slug)}`;
               return (
               <a
                 key={event.slug}
