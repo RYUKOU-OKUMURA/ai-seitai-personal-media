@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import SiteHeader from '../../components/common/SiteHeader.astro';
 import { getEntry } from 'astro:content';
 
 const slug = Astro.params.slug;
@@ -17,8 +18,9 @@ const { Content } = await event.render();
 	description={`${event.data.dateLabel} 開催 - ${event.data.title}`}
 	ogImage={event.data.image}
 >
+	<SiteHeader />
 	<main class="bg-white min-h-screen">
-		<header class="bg-background-light pt-20 pb-10 px-4 border-b border-gray-200">
+		<header class="bg-background-light pt-8 pb-10 px-4 border-b border-gray-200">
 			<div class="max-w-[900px] mx-auto">
 				<a
 					href="/#events"

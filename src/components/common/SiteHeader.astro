@@ -1,0 +1,29 @@
+---
+/**
+ * Astro pages (blog detail, event detail, blog listing) 用の共通ヘッダー。
+ * ホームページの React Navbar と同じ見た目で、ロゴクリックでホームに戻れる。
+ */
+---
+
+<nav class="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-[#f0f2f4]">
+	<div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="flex justify-between items-center h-16">
+			<!-- Logo -->
+			<a href="/" class="flex items-center gap-3 no-underline">
+				<div class="size-8 text-primary bg-primary/10 rounded-lg flex items-center justify-center">
+					<img src="/favicon-32x32.png" alt="Logo" class="w-6 h-6 object-contain" />
+				</div>
+				<span class="text-[#111418] text-lg font-bold tracking-tight">整体院のAI仕組み化支援</span>
+			</a>
+
+			<!-- Home link -->
+			<a
+				href="/"
+				class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-primary transition-colors no-underline"
+			>
+				<span class="material-symbols-outlined text-base">home</span>
+				<span class="hidden sm:inline">ホーム</span>
+			</a>
+		</div>
+	</div>
+</nav>
