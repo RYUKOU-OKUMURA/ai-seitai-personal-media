@@ -24,7 +24,12 @@ const Hero: React.FC = () => {
         スタッフでも回る運用に落とし込みます。
       </p>
       <div className="flex flex-col gap-3 pt-4">
-        <button className="flex items-center justify-center gap-3 bg-primary hover:bg-blue-600 text-white text-2xl font-bold h-16 px-6 rounded-full shadow-lg shadow-blue-200 transition-all">
+        <button 
+          onClick={() => {
+            document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          className="flex items-center justify-center gap-3 bg-primary hover:bg-blue-600 text-white text-2xl font-bold h-16 px-6 rounded-full shadow-lg shadow-blue-200 transition-all"
+        >
           <span>無料相談を予約</span>
           <span className="material-symbols-outlined text-lg">arrow_forward</span>
         </button>
