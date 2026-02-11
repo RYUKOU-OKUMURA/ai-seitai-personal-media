@@ -23,6 +23,7 @@ const Contact: React.FC = () => {
     const data = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
+      organization: formData.get('organization') as string,
       category: formData.get('category') as string,
       message: formData.get('message') as string,
       website: formData.get('website') as string,
@@ -108,6 +109,17 @@ const Contact: React.FC = () => {
                   required
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-[#111418]" htmlFor="organization">院名・会社名 <span className="text-red-500">*</span></label>
+              <input
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                id="organization"
+                name="organization"
+                placeholder="○○整骨院 / 株式会社○○"
+                type="text"
+                required
+              />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-[#111418]" htmlFor="category">ご相談内容 <span className="text-red-500">*</span></label>

@@ -40,6 +40,7 @@ const CONTACT_GLOBAL_RATE_LIMIT = {
 
 const MAX_BODY_BYTES = 12_000;
 const MAX_NAME_LENGTH = 80;
+const MAX_ORGANIZATION_LENGTH = 120;
 const MAX_EMAIL_LENGTH = 254;
 const MAX_MESSAGE_LENGTH = 2_000;
 const MAX_IDEMPOTENCY_KEY_LENGTH = 128;
@@ -166,6 +167,7 @@ export const POST: APIRoute = async ({ request, url }) => {
 
 		const name = trimAndLimit(body.name, MAX_NAME_LENGTH);
 		const email = trimAndLimit(body.email, MAX_EMAIL_LENGTH).replace(/[\r\n]/g, '');
+		const organization = trimAndLimit(body.organization, MAX_ORGANIZATION_LENGTH);
 		const category = trimAndLimit(body.category, 30);
 		const message = trimAndLimit(body.message, MAX_MESSAGE_LENGTH);
 		const website = trimAndLimit(body.website, 120);
@@ -182,7 +184,7 @@ export const POST: APIRoute = async ({ request, url }) => {
 			return buildErrorResponse('入力内容を確認してください。', 400, 'SEND_FAILED', baseHeaders);
 		}
 
-		if (!name || !email || !category || !idempotencyKey) {
+		if (!name || !email || !organization || !category || !idempotencyKey) {
 			return buildErrorResponse('必須項目を入力してください。', 400, 'SEND_FAILED', baseHeaders);
 		}
 		if (!EMAIL_REGEX.test(email)) {
@@ -236,6 +238,7 @@ export const POST: APIRoute = async ({ request, url }) => {
 		const payload: ContactPayload = {
 			name,
 			email,
+			organization,
 			category,
 			categoryLabel,
 			message,

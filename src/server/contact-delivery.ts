@@ -12,6 +12,7 @@ export type MailProviderName = 'gmail' | 'resend';
 export type ContactPayload = {
 	name: string;
 	email: string;
+	organization: string;
 	category: string;
 	categoryLabel: string;
 	message: string;
@@ -34,7 +35,7 @@ const escapeHtml = (value: string): string =>
 		.replace(/"/g, '&quot;')
 		.replace(/'/g, '&#39;');
 
-const buildMailHtml = (safeName: string, safeEmail: string, safeCategoryLabel: string, safeMessage: string): string => `
+const buildMailHtml = (safeName: string, safeEmail: string, safeOrganization: string, safeCategoryLabel: string, safeMessage: string): string => `
 	<h2>ウェブサイトからのお問い合わせ</h2>
 	<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
 		<tr>
@@ -44,6 +45,10 @@ const buildMailHtml = (safeName: string, safeEmail: string, safeCategoryLabel: s
 		<tr>
 			<td style="padding: 8px 12px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">メールアドレス</td>
 			<td style="padding: 8px 12px; border: 1px solid #ddd;">${safeEmail}</td>
+		</tr>
+		<tr>
+			<td style="padding: 8px 12px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">院名・会社名</td>
+			<td style="padding: 8px 12px; border: 1px solid #ddd;">${safeOrganization}</td>
 		</tr>
 		<tr>
 			<td style="padding: 8px 12px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">ご相談内容</td>
@@ -70,6 +75,7 @@ const sendViaGmail = async (payload: ContactPayload): Promise<void> => {
 
 	const safeName = escapeHtml(payload.name);
 	const safeEmail = escapeHtml(payload.email);
+	const safeOrganization = escapeHtml(payload.organization);
 	const safeCategoryLabel = escapeHtml(payload.categoryLabel);
 	const safeMessage = payload.message ? escapeHtml(payload.message).replace(/\n/g, '<br>') : '（なし）';
 
@@ -78,7 +84,7 @@ const sendViaGmail = async (payload: ContactPayload): Promise<void> => {
 		to: payload.contactTo,
 		replyTo: payload.replyTo,
 		subject: `【お問い合わせ】${payload.categoryLabel} - ${payload.name}様`,
-		html: buildMailHtml(safeName, safeEmail, safeCategoryLabel, safeMessage),
+		html: buildMailHtml(safeName, safeEmail, safeOrganization, safeCategoryLabel, safeMessage),
 	});
 };
 
@@ -91,6 +97,7 @@ const sendViaResend = async (payload: ContactPayload): Promise<void> => {
 
 	const safeName = escapeHtml(payload.name);
 	const safeEmail = escapeHtml(payload.email);
+	const safeOrganization = escapeHtml(payload.organization);
 	const safeCategoryLabel = escapeHtml(payload.categoryLabel);
 	const safeMessage = payload.message ? escapeHtml(payload.message).replace(/\n/g, '<br>') : '（なし）';
 
@@ -105,7 +112,7 @@ const sendViaResend = async (payload: ContactPayload): Promise<void> => {
 			to: [payload.contactTo],
 			reply_to: payload.replyTo,
 			subject: `【お問い合わせ】${payload.categoryLabel} - ${payload.name}様`,
-			html: buildMailHtml(safeName, safeEmail, safeCategoryLabel, safeMessage),
+			html: buildMailHtml(safeName, safeEmail, safeOrganization, safeCategoryLabel, safeMessage),
 		}),
 	});
 
@@ -144,6 +151,7 @@ const isQueuePayload = (value: unknown): value is ContactPayload => {
 	return (
 		typeof row.name === 'string' &&
 		typeof row.email === 'string' &&
+		typeof row.organization === 'string' &&
 		typeof row.category === 'string' &&
 		typeof row.categoryLabel === 'string' &&
 		typeof row.message === 'string' &&
