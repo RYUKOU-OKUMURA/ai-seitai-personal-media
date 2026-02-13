@@ -88,21 +88,40 @@ async function postToMicroCMS(
   const baseUrl = `https://${MICROCMS_SERVICE_DOMAIN}.microcms.io/api/v1/${endpoint}`;
   const draftQuery = isDraft ? '?status=draft' : '';
 
-  // contentId があれば PUT（作成 or 更新）、なければ POST（新規作成・ID自動生成）
-  const url = contentId ? `${baseUrl}/${contentId}${draftQuery}` : `${baseUrl}${draftQuery}`;
-  const method = contentId ? 'PUT' : 'POST';
+  const headers = {
+    'X-MICROCMS-API-KEY': MICROCMS_API_KEY!,
+    'Content-Type': 'application/json',
+  };
 
-  const response = await fetch(url, {
-    method,
-    headers: {
-      'X-MICROCMS-API-KEY': MICROCMS_API_KEY!,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
+  let response: Response;
+  if (contentId) {
+    response = await fetch(`${baseUrl}/${contentId}${draftQuery}`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify(payload),
+    });
+    if (response.status === 404) {
+      response = await fetch(`${baseUrl}/${contentId}${draftQuery}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(payload),
+      });
+    }
+  } else {
+    response = await fetch(`${baseUrl}${draftQuery}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
+  }
 
   if (!response.ok) {
     const errorBody = await response.text();
+    if (errorBody.includes('PATCH is forbidden')) {
+      throw new Error(
+        `microCMS API エラー: 既存コンテンツの更新には PATCH 権限が必要です。APIキー管理で PATCH にチェックを入れてください。`,
+      );
+    }
     throw new Error(`microCMS API エラー (${response.status}): ${errorBody}`);
   }
 
@@ -116,28 +135,47 @@ function buildBlogPayload(
   frontmatter: Record<string, unknown>,
   htmlBody: string,
 ): Record<string, unknown> {
-  const category = frontmatter.category;
-  return {
+  const payload: Record<string, unknown> = {
     title: frontmatter.title,
     publishedAt: frontmatter.publishedAt,
-    category: Array.isArray(category) ? category : [category],
-    excerpt: frontmatter.excerpt,
-    body: htmlBody,
+    // ブログテンプレートは content、マイグレーションプラン準拠は body
+    content: htmlBody,
   };
+  // category: テンプレートがコンテンツ参照（カテゴリAPI）の場合は送信しない。管理画面で手動設定
+  return payload;
 }
 
 function buildEventPayload(
   frontmatter: Record<string, unknown>,
   htmlBody: string,
 ): Record<string, unknown> {
-  const tag = frontmatter.tag;
-  return {
-    title: frontmatter.title,
-    dateLabel: frontmatter.dateLabel,
-    tag: Array.isArray(tag) ? tag : [tag],
-    link: (frontmatter.link as string) || '',
-    body: htmlBody,
+  // イベントAPI: title（テキストエリア）, contents（リッチエディタ）, eyecatch（画像）, category（セレクト）
+  const title = (frontmatter.title as string) || '';
+  const dateLabel = (frontmatter.dateLabel as string) || '';
+  const tag = frontmatter.tag as string | undefined;
+  const linkVal = (frontmatter.link as string) || '';
+  const category = tag ? (Array.isArray(tag) ? tag : [tag]) : [];
+
+  const header = [
+    dateLabel && `<p class="text-gray-500 mb-4">${dateLabel}</p>`,
+    tag && `<span class="inline-block px-3 py-1 bg-primary/10 text-primary rounded text-sm font-bold mb-4">${tag}</span>`,
+    linkVal && linkVal !== '#' && `<p><a href="${linkVal}" target="_blank" rel="noopener">申し込みページへ</a></p>`,
+  ]
+    .filter(Boolean)
+    .join('');
+  const contentsHtml = header + htmlBody;
+
+  const payload: Record<string, unknown> = {
+    title,
+    contents: contentsHtml,
+    category,
   };
+  // eyecatch: 画像URL（microCMS メディアライブラリの URL のみ有効。ローカルパスは送信しない）
+  const imagePath = frontmatter.image as string | undefined;
+  if (imagePath && imagePath.startsWith('http')) {
+    payload.eyecatch = imagePath;
+  }
+  return payload;
 }
 
 // ---------------------------------------------------------------------------
@@ -149,7 +187,7 @@ async function main() {
   const { data: frontmatter, content: markdownBody } = matter(raw);
 
   const contentType = detectContentType(filePath);
-  const endpoint = contentType === 'blog' ? 'blogs' : 'events';
+  const endpoint = contentType === 'blog' ? 'blogs' : 'event';
   const contentId = (frontmatter.slug as string) || undefined;
   const isDraft = frontmatter.draft === true;
 

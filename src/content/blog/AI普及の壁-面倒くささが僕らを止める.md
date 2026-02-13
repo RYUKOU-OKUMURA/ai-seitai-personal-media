@@ -1,5 +1,6 @@
 ---
 title: "AI普及の壁——面倒くささが僕らを止める"
+slug: "ai-fukyuu-no-kabe"
 publishedAt: "2026-02-11T00:00:00.000Z"
 category: "マインド"
 image: "/images/blog/asset_3tqb3o2bm_1770801415736.png"

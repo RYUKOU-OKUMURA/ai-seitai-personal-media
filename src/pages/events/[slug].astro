@@ -31,10 +31,12 @@ const imageUrl = event.image?.url ?? '';
 					イベント一覧に戻る
 				</a>
 
-				<div class="mt-6 inline-block px-3 py-1 bg-primary/10 text-primary rounded-sm text-xs font-bold">
-					{event.tag[0]}
-				</div>
-				<h1 class="text-2xl md:text-4xl font-black text-[#111418] mt-4 leading-tight">{event.title}</h1>
+				{event.tag?.[0] ? (
+					<div class="mt-6 inline-block px-3 py-1 bg-primary/10 text-primary rounded-sm text-xs font-bold">
+						{event.tag[0]}
+					</div>
+				) : null}
+				<h1 class={`text-2xl md:text-4xl font-black text-[#111418] leading-tight ${event.tag?.[0] ? 'mt-4' : 'mt-6'}`}>{event.title}</h1>
 				<div class="flex items-center gap-2 text-gray-500 text-sm mt-4">
 					<span class="material-symbols-outlined text-base">calendar_month</span>
 					{event.dateLabel}
