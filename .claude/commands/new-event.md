@@ -27,7 +27,7 @@ dateLabel: "2025.01.15 (水) 20:00~"
 image: ""
 tag: "募集中"
 link: "申し込みURL"
-draft: false
+draft: true
 ---
 ```
 
@@ -41,7 +41,7 @@ draft: false
 | `tag` | 必須 | ステータスタグ。既存例: "募集中", "残り3枠", "告知予定", "先行予約", "動画"。microCMS の category に送信される |
 | `image` | 任意 | 空文字 `""` にする。画像は microCMS 管理画面のメディアライブラリからアップロードし、http の URL を指定する |
 | `link` | 任意 | 申し込み・詳細ページのURL。未定の場合は `"#"` |
-| `draft` | 任意 | 下書きにしたい場合は `true`。デフォルトは `false` |
+| `draft` | 任意 | デフォルトは `true`（下書き）。公開する場合は `false` を指定 |
 
 ## 本文について
 

@@ -12,6 +12,7 @@
  *
  * frontmatter に slug フィールドがあれば、その値を contentId として使用（URLスラッグになる）
  * slug がなければ microCMS が自動生成する
+ * draft はデフォルト true（下書き）。公開する場合は draft: false を明示
  *
  * 必要な環境変数 (.env.local):
  *   MICROCMS_SERVICE_DOMAIN - microCMS のサービスドメイン
@@ -193,7 +194,8 @@ async function main() {
   const contentType = detectContentType(filePath);
   const endpoint = contentType === 'blog' ? 'blogs' : 'event';
   const contentId = (frontmatter.slug as string) || undefined;
-  const isDraft = frontmatter.draft === true;
+  // デフォルトは下書き。公開する場合は frontmatter で draft: false を明示
+  const isDraft = frontmatter.draft !== false;
 
   console.log(`\n--- microCMS 投稿 ---`);
   console.log(`ファイル:     ${filePath}`);

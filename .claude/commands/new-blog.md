@@ -26,7 +26,7 @@ publishedAt: "YYYY-MM-DDT00:00:00.000Z"
 category: "カテゴリ名"
 image: ""
 excerpt: "要約文（1〜2文）"
-draft: false
+draft: true
 ---
 ```
 
@@ -40,7 +40,7 @@ draft: false
 | `category` | 必須 | カテゴリ。既存例: "マインド", "実践ノウハウ", "マインドセット", "チームビルディング"。microCMS では管理画面で手動設定 |
 | `image` | 任意 | 空文字 `""` にする。画像は microCMS 管理画面のメディアライブラリからアップロードし、記事編集で設定 |
 | `excerpt` | 必須 | 記事の要約。1〜2文で核心となるメッセージを端的に伝える（サイト表示用。microCMS には送信されない） |
-| `draft` | 任意 | 下書きにしたい場合は `true`。デフォルトは `false` |
+| `draft` | 任意 | デフォルトは `true`（下書き）。公開する場合は `false` を指定 |
 
 ## 本文の構成ルール
 
