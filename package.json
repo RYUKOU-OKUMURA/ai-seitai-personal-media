@@ -11,7 +11,8 @@
     "astro": "astro",
     "typecheck": "tsc --noEmit",
     "test:security": "node --test --experimental-strip-types tests/security.test.ts",
-    "test": "npm run typecheck && npm run test:security"
+    "test": "npm run typecheck && npm run test:security",
+    "cms:post": "tsx scripts/post-to-microcms.ts"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",
@@ -32,6 +33,10 @@
     "@types/node": "^22.14.0",
     "@types/nodemailer": "^7.0.9",
     "@vitejs/plugin-react": "^5.0.0",
+    "dotenv": "^17.3.1",
+    "gray-matter": "^4.0.3",
+    "marked": "^17.0.2",
+    "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

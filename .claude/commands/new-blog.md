@@ -13,6 +13,7 @@
 ```yaml
 ---
 title: "メインテーマ——サブメッセージ"
+slug: "english-slug-here"
 publishedAt: "YYYY-MM-DDT00:00:00.000Z"
 category: "カテゴリ名"
 image: "/public/images/blog/ファイル名"
@@ -26,6 +27,7 @@ draft: false
 | フィールド | 必須 | 説明 |
 |---|---|---|
 | `title` | 必須 | 「メインテーマ——サブメッセージ」の形式。ダッシュ（——）で区切る。具体的で読者の興味を引く表現にする |
+| `slug` | 必須 | microCMS の contentId（URLスラッグ）。英数字・ハイフンのみ（例: `"ai-fukyuu-no-kabe"`）。タイトルのローマ字要約を使用 |
 | `publishedAt` | 必須 | 公開日。ISO 8601形式（例: `"2026-02-11T00:00:00.000Z"`）。特に指定がなければ今日の日付を使用 |
 | `category` | 必須 | カテゴリ。既存例: "マインドセット", "チームビルディング", "実践ノウハウ" |
 | `image` | 任意 | アイキャッチ画像パス（`/public/images/blog/` 配下）。指定がなければ空文字 |
