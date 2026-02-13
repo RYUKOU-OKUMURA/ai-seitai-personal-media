@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../common/Navbar';
 import Home from '../pages/Home';
 import AiTrainingPage from '../pages/AiTrainingPage';
@@ -35,6 +35,29 @@ const App: React.FC<AppProps> = ({ events, posts }) => {
     setCurrentRoute(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // マウント時に #contact ハッシュがあればスクロール（ブログ・イベントページからの遷移時）
+  useEffect(() => {
+    if (window.location.hash !== '#contact') return;
+    const scrollToContact = () => {
+      const el = document.getElementById('contact');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        return true;
+      }
+      return false;
+    };
+    if (!scrollToContact()) {
+      const id = setInterval(() => {
+        if (scrollToContact()) clearInterval(id);
+      }, 100);
+      const timeout = setTimeout(() => clearInterval(id), 2000);
+      return () => {
+        clearInterval(id);
+        clearTimeout(timeout);
+      };
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-background-light">
