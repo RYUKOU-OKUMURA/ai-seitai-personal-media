@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import SiteHeader from '../../components/common/SiteHeader.astro';
-import { getCollection } from 'astro:content';
+import { getBlogs } from '../../lib/microcms';
 
 const formatDate = (iso: string) => {
 	const date = new Date(iso);
@@ -12,9 +12,7 @@ const formatDate = (iso: string) => {
 	return `${y}.${m}.${d}`;
 };
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) =>
-	a.data.publishedAt < b.data.publishedAt ? 1 : -1,
-);
+const posts = await getBlogs();
 ---
 
 <Layout title="院長コラム・ブログ | 整体院のAI仕組み化支援" description="日々の気づきや、AI活用の裏話などを更新しています。">
@@ -43,10 +41,10 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, 
 							class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group flex flex-col"
 						>
 							<div class="aspect-video overflow-hidden relative bg-gray-100">
-								{post.data.image ? (
+								{post.image ? (
 									<img
-										src={post.data.image}
-										alt={post.data.title}
+										src={post.image}
+										alt={post.title}
 										class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
 										loading="lazy"
 									/>
@@ -54,18 +52,18 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, 
 									<div class="w-full h-full bg-gray-100" />
 								)}
 								<div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-[#111418] text-xs font-bold px-3 py-1 rounded-sm">
-									{post.data.category}
+									{post.category}
 								</div>
 							</div>
 							<div class="p-6 flex flex-col flex-grow">
 								<div class="flex items-center gap-2 text-xs text-gray-500 mb-3">
 									<span class="material-symbols-outlined text-sm">schedule</span>
-									{formatDate(post.data.publishedAt)}
+									{formatDate(post.publishedAt)}
 								</div>
 								<h2 class="text-lg font-bold text-[#111418] mb-3 leading-snug group-hover:text-primary transition-colors line-clamp-2">
-									{post.data.title}
+									{post.title}
 								</h2>
-								<p class="text-sm text-gray-700 leading-relaxed line-clamp-3 mb-4 flex-grow">{post.data.excerpt}</p>
+								<p class="text-sm text-gray-700 leading-relaxed line-clamp-3 mb-4 flex-grow">{post.excerpt}</p>
 								<div class="text-primary text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all mt-auto">
 									続きを読む <span class="material-symbols-outlined text-sm">arrow_forward</span>
 								</div>

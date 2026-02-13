@@ -14,26 +14,21 @@
           "type": "string"
         },
         "image": {
-          "type": "string",
-          "default": ""
+          "type": "string"
         },
         "excerpt": {
           "type": "string"
         },
         "draft": {
-          "type": "boolean",
-          "default": false
+          "type": "boolean"
+        },
+        "slug": {
+          "type": "string"
         },
         "$schema": {
           "type": "string"
         }
       },
-      "required": [
-        "title",
-        "publishedAt",
-        "category",
-        "excerpt"
-      ],
       "additionalProperties": false
     }
   },

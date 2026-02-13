@@ -16,6 +16,8 @@ interface ImportMetaEnv {
   readonly PUBLIC_SITE_URL?: string;
   readonly YOUTUBE_API_KEY?: string;
   readonly YOUTUBE_CHANNEL_ID?: string;
+  readonly MICROCMS_SERVICE_DOMAIN?: string;
+  readonly MICROCMS_API_KEY?: string;
 }
 
 interface ImportMeta {
