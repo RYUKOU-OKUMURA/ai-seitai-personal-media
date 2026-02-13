@@ -7,10 +7,20 @@
 import { createClient } from 'microcms-js-sdk';
 import type { BlogPostListItem, EventListItem } from '../types/core';
 
+// Vercel 等のランタイムでは import.meta.env がビルド時に空になることがあるため、
+// process.env をフォールバックとして使用（Astro SSR / Vercel サーバーレス対応）
+function getEnv(name: string): string {
+  if (typeof process !== 'undefined' && process.env?.[name]) {
+    return process.env[name] ?? '';
+  }
+  const v = (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.[name];
+  return v ?? '';
+}
+
 // microCMS クライアント初期化
 export const client = createClient({
-  serviceDomain: import.meta.env.MICROCMS_SERVICE_DOMAIN ?? '',
-  apiKey: import.meta.env.MICROCMS_API_KEY ?? '',
+  serviceDomain: getEnv('MICROCMS_SERVICE_DOMAIN'),
+  apiKey: getEnv('MICROCMS_API_KEY'),
 });
 
 // ---------------------------------------------------------------------------
@@ -107,17 +117,19 @@ function getBlogImageUrl(blog: Blog): string {
 
 /**
  * ブログ一覧を取得
+ * API 失敗時は空配列を返し、500 を防ぐ
  */
 export async function getBlogs(): Promise<BlogPostListItem[]> {
-  const response = await client.get<MicroCMSListResponse<Blog>>({
-    endpoint: 'blogs',
-    queries: {
-      orders: '-publishedAt',
-      limit: 100,
-    },
-  });
+  try {
+    const response = await client.get<MicroCMSListResponse<Blog>>({
+      endpoint: 'blogs',
+      queries: {
+        orders: '-publishedAt',
+        limit: 100,
+      },
+    });
 
-  return response.contents.map((blog) => {
+    return response.contents.map((blog) => {
     const cat = blog.category;
     const categoryStr = Array.isArray(cat) ? cat[0] : typeof cat === 'object' && cat && 'name' in cat ? (cat as { name?: string }).name : '';
     return {
@@ -129,6 +141,9 @@ export async function getBlogs(): Promise<BlogPostListItem[]> {
       excerpt: blog.excerpt ?? '',
     };
   });
+  } catch {
+    return [];
+  }
 }
 
 /**
@@ -168,15 +183,18 @@ export async function getBlogDetail(
  * 全ブログの slug 一覧を取得（静的パス生成用）
  */
 export async function getAllBlogSlugs(): Promise<string[]> {
-  const response = await client.get<MicroCMSListResponse<Blog>>({
-    endpoint: 'blogs',
-    queries: {
-      fields: 'id',
-      limit: 100,
-    },
-  });
-
-  return response.contents.map((blog) => blog.id);
+  try {
+    const response = await client.get<MicroCMSListResponse<Blog>>({
+      endpoint: 'blogs',
+      queries: {
+        fields: 'id',
+        limit: 100,
+      },
+    });
+    return response.contents.map((blog) => blog.id);
+  } catch {
+    return [];
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -185,17 +203,19 @@ export async function getAllBlogSlugs(): Promise<string[]> {
 
 /**
  * イベント一覧を取得
+ * API 失敗時は空配列を返し、500 を防ぐ
  */
 export async function getEvents(): Promise<EventListItem[]> {
-  const response = await client.get<MicroCMSListResponse<Event>>({
-    endpoint: 'event',
-    queries: {
-      orders: '-publishedAt',
-      limit: 100,
-    },
-  });
+  try {
+    const response = await client.get<MicroCMSListResponse<Event>>({
+      endpoint: 'event',
+      queries: {
+        orders: '-publishedAt',
+        limit: 100,
+      },
+    });
 
-  return response.contents.map((ev) => {
+    return response.contents.map((ev) => {
     const html = ev.title ?? ev.event ?? '';
     const hasStructuredData = ev.contents !== undefined;
     const titleStr = hasStructuredData ? (ev.title ?? ev.id) : (extractH1(html) || ev.id);
@@ -214,6 +234,9 @@ export async function getEvents(): Promise<EventListItem[]> {
       link: ev.link ?? '',
     };
   });
+  } catch {
+    return [];
+  }
 }
 
 /**
@@ -263,13 +286,16 @@ export async function getEventDetail(
  * 全イベントの slug 一覧を取得（静的パス生成用）
  */
 export async function getAllEventSlugs(): Promise<string[]> {
-  const response = await client.get<MicroCMSListResponse<Event>>({
-    endpoint: 'event',
-    queries: {
-      fields: 'id',
-      limit: 100,
-    },
-  });
-
-  return response.contents.map((event) => event.id);
+  try {
+    const response = await client.get<MicroCMSListResponse<Event>>({
+      endpoint: 'event',
+      queries: {
+        fields: 'id',
+        limit: 100,
+      },
+    });
+    return response.contents.map((event) => event.id);
+  } catch {
+    return [];
+  }
 }

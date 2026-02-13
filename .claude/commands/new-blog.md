@@ -7,6 +7,14 @@
 1. ユーザーの入力からブログ記事のテーマ・内容を把握する
 2. ファイル名を決定する（日本語タイトルをハイフン区切りにする。例: `仕組み化の本質-悩まず決めることが重要.md`）
 3. 以下のフォーマットに従って `src/content/blog/` に新しい `.md` ファイルを作成する
+4. 作成後、`npm run cms:post -- src/content/blog/ファイル名.md` で microCMS に投稿する
+
+## microCMS 連携ルール
+
+- この Markdown は **microCMS に自動投稿**される。`npm run cms:post` で反映。
+- microCMS の blogs API: `title`, `content`（本文）, `eyecatch`（画像）, `category`（管理画面で手動設定）
+- `slug` が contentId になる。同じ slug で再実行すると更新（PATCH）される。
+- `excerpt` はブログテンプレートに未定義のため送信しない。サイト表示用に frontmatter には記載する。
 
 ## フロントマターのフォーマット
 
@@ -16,7 +24,7 @@ title: "メインテーマ——サブメッセージ"
 slug: "english-slug-here"
 publishedAt: "YYYY-MM-DDT00:00:00.000Z"
 category: "カテゴリ名"
-image: "/public/images/blog/ファイル名"
+image: ""
 excerpt: "要約文（1〜2文）"
 draft: false
 ---
@@ -29,9 +37,9 @@ draft: false
 | `title` | 必須 | 「メインテーマ——サブメッセージ」の形式。ダッシュ（——）で区切る。具体的で読者の興味を引く表現にする |
 | `slug` | 必須 | microCMS の contentId（URLスラッグ）。英数字・ハイフンのみ（例: `"ai-fukyuu-no-kabe"`）。タイトルのローマ字要約を使用 |
 | `publishedAt` | 必須 | 公開日。ISO 8601形式（例: `"2026-02-11T00:00:00.000Z"`）。特に指定がなければ今日の日付を使用 |
-| `category` | 必須 | カテゴリ。既存例: "マインドセット", "チームビルディング", "実践ノウハウ" |
-| `image` | 任意 | アイキャッチ画像パス（`/public/images/blog/` 配下）。指定がなければ空文字 |
-| `excerpt` | 必須 | 記事の要約。1〜2文で核心となるメッセージを端的に伝える |
+| `category` | 必須 | カテゴリ。既存例: "マインド", "実践ノウハウ", "マインドセット", "チームビルディング"。microCMS では管理画面で手動設定 |
+| `image` | 任意 | 空文字 `""` にする。画像は microCMS 管理画面のメディアライブラリからアップロードし、記事編集で設定 |
+| `excerpt` | 必須 | 記事の要約。1〜2文で核心となるメッセージを端的に伝える（サイト表示用。microCMS には送信されない） |
 | `draft` | 任意 | 下書きにしたい場合は `true`。デフォルトは `false` |
 
 ## 本文の構成ルール
@@ -76,5 +84,6 @@ draft: false
 ## 注意事項
 
 - ユーザーが指定していない必須フィールドがあれば、作成前に確認する
-- `image` が指定されていない場合は空文字 `""` にする
+- `image` は常に空文字 `""` にする（microCMS の eyecatch は管理画面で設定）
 - ユーザーからはテーマやキーワード程度の指示でも、上記の構成・文体ルールに従って完成度の高い記事を生成する
+- 作成後は `npm run cms:post -- src/content/blog/ファイル名.md` を実行して microCMS に投稿する
