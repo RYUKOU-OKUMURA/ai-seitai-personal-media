@@ -13,7 +13,7 @@
 
 - この Markdown は **microCMS に自動投稿**される。`npm run cms:post` で反映。
 - microCMS の event API: `title`（タイトルのみ）, `contents`（リッチエディタ）, `eyecatch`（画像）, `category`（セレクト）
-- `slug` が contentId になる。同じ slug で再実行すると更新（PATCH）される。新規の場合は ID 自動生成。
+- **新規投稿が前提**。`slug` が contentId になり、初回は PUT で新規作成される。同じ slug で再実行すると更新（PATCH）される。
 - `contents` には、日程・タグ・リンク・本文が HTML として送信される（Markdown 本文は HTML に変換）。
 - `image` は **http で始まる URL のみ**有効。microCMS メディアライブラリの URL を指定する。ローカルパスや空文字は送信しない。
 

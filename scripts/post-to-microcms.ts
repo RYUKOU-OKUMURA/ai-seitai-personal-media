@@ -100,12 +100,16 @@ async function postToMicroCMS(
       headers,
       body: JSON.stringify(payload),
     });
-    if (response.status === 404) {
+    const errorBody = await response.text();
+    // 404 または 400 "Content is not exists" の場合は新規作成として PUT を試行
+    if (!response.ok && (response.status === 404 || (response.status === 400 && errorBody.includes('Content is not exists')))) {
       response = await fetch(`${baseUrl}/${contentId}${draftQuery}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(payload),
       });
+    } else if (!response.ok) {
+      throw new Error(`microCMS API エラー (${response.status}): ${errorBody}`);
     }
   } else {
     response = await fetch(`${baseUrl}${draftQuery}`, {
