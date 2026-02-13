@@ -130,17 +130,17 @@ export async function getBlogs(): Promise<BlogPostListItem[]> {
     });
 
     return response.contents.map((blog) => {
-    const cat = blog.category;
-    const categoryStr = Array.isArray(cat) ? cat[0] : typeof cat === 'object' && cat && 'name' in cat ? (cat as { name?: string }).name : '';
-    return {
-      slug: blog.id,
-      title: blog.title,
-      publishedAt: blog.publishedAt,
-      category: categoryStr ?? '',
-      image: getBlogImageUrl(blog),
-      excerpt: blog.excerpt ?? '',
-    };
-  });
+      const cat = blog.category;
+      const categoryStr = Array.isArray(cat) ? cat[0] : typeof cat === 'object' && cat && 'name' in cat ? (cat as { name?: string }).name : '';
+      return {
+        slug: blog.id,
+        title: blog.title,
+        publishedAt: blog.publishedAt,
+        category: categoryStr ?? '',
+        image: getBlogImageUrl(blog),
+        excerpt: blog.excerpt ?? '',
+      };
+    });
   } catch {
     return [];
   }
@@ -216,24 +216,24 @@ export async function getEvents(): Promise<EventListItem[]> {
     });
 
     return response.contents.map((ev) => {
-    const html = ev.title ?? ev.event ?? '';
-    const hasStructuredData = ev.contents !== undefined;
-    const titleStr = hasStructuredData ? (ev.title ?? ev.id) : (extractH1(html) || ev.id);
-    const tagStr = Array.isArray(ev.category)
-      ? ev.category[0] ?? ''
-      : Array.isArray(ev.tag)
-        ? ev.tag[0] ?? ''
-        : '';
-    const imageUrl = ev.eyecatch?.url ?? ev.image?.url ?? '';
-    return {
-      slug: ev.id,
-      title: titleStr,
-      dateLabel: ev.dateLabel ?? extractDateLabel(ev.contents ?? html),
-      image: imageUrl,
-      tag: tagStr,
-      link: ev.link ?? '',
-    };
-  });
+      const html = ev.title ?? ev.event ?? '';
+      const hasStructuredData = ev.contents !== undefined;
+      const titleStr = hasStructuredData ? (ev.title ?? ev.id) : (extractH1(html) || ev.id);
+      const tagStr = Array.isArray(ev.category)
+        ? ev.category[0] ?? ''
+        : Array.isArray(ev.tag)
+          ? ev.tag[0] ?? ''
+          : '';
+      const imageUrl = ev.eyecatch?.url ?? ev.image?.url ?? '';
+      return {
+        slug: ev.id,
+        title: titleStr,
+        dateLabel: ev.dateLabel ?? extractDateLabel(ev.contents ?? html),
+        image: imageUrl,
+        tag: tagStr,
+        link: ev.link ?? '',
+      };
+    });
   } catch {
     return [];
   }

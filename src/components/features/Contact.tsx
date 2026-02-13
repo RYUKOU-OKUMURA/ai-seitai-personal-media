@@ -79,7 +79,7 @@ const Contact: React.FC = () => {
             </button>
           </div>
         ) : (
-	          <form className="bg-white p-8 md:p-10 rounded-xl shadow-lg border border-gray-100 space-y-6" onSubmit={handleSubmit}>
+          <form className="bg-white p-8 md:p-10 rounded-xl shadow-lg border border-gray-100 space-y-6" onSubmit={handleSubmit}>
 	            <input type="hidden" name="submittedAt" value={submittedAt} readOnly />
 	            <input type="hidden" name="idempotencyKey" value={idempotencyKey} readOnly />
 	            <div className="hidden" aria-hidden="true">
@@ -148,20 +148,20 @@ const Contact: React.FC = () => {
               ></textarea>
             </div>
 
-	            {status === 'error' && (
-	              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
-	                {errorMessage}
-	              </div>
-	            )}
+            {status === 'error' && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
+                {errorMessage}
+              </div>
+            )}
 
-	            <button
-	              className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg shadow-blue-200 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-	              type="submit"
-	              disabled={status === 'sending'}
-	            >
-	              {status === 'sending' ? '送信中...' : '送信する'}
-	            </button>
-	          </form>
+            <button
+              className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg shadow-blue-200 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              type="submit"
+              disabled={status === 'sending'}
+            >
+              {status === 'sending' ? '送信中...' : '送信する'}
+            </button>
+          </form>
         )}
         <p className="text-center text-xs text-gray-500 leading-relaxed mt-6">
           ※ 送信いただいた情報は、お問い合わせ対応以外の目的には使用いたしません。<br />

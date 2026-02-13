@@ -69,7 +69,7 @@ const Philosophy: React.FC = () => {
         <div className="text-center">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="inline-flex items-center gap-2 text-primary font-semibold hover:text-primary-dark transition-colors py-2 px-4 rounded-lg hover:bg-blue-50"
+            className="inline-flex items-center gap-2 text-primary font-semibold hover:text-primary/90 transition-colors py-2 px-4 rounded-lg hover:bg-blue-50"
             aria-expanded={isOpen}
           >
             {isOpen ? (

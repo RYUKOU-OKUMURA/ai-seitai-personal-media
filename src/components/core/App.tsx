@@ -21,6 +21,14 @@ const App: React.FC<AppProps> = ({ events, posts }) => {
   const [selectedCaseId, setSelectedCaseId] = useState<number | undefined>(undefined);
 
   const navigate = (page: string, id?: number) => {
+    if (page === 'contact') {
+      setCurrentRoute('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => {
+        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      return;
+    }
     if (page === 'case-detail' && id) {
       setSelectedCaseId(id);
     }
@@ -44,10 +52,10 @@ const App: React.FC<AppProps> = ({ events, posts }) => {
           <CaseStudyDetail id={selectedCaseId} cases={INITIAL_CASE_STUDIES} onNavigate={navigate} />
         )}
       </main>
-      
-	      <Footer onNavigate={navigate} />
-	    </div>
-	  );
-	};
+
+      <Footer onNavigate={navigate} />
+    </div>
+  );
+};
 
 export default App;

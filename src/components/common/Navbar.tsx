@@ -8,7 +8,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentRoute = 'home' }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, hash: string) => {
+  const handleLinkClick = (e: React.MouseEvent<HTMLElement>, hash: string) => {
     e.preventDefault();
     if (onNavigate) {
       if (currentRoute !== 'home') {
@@ -33,7 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentRoute = 'home' }) =>
   const goHome = () => {
     if (onNavigate) onNavigate('home');
     setIsOpen(false);
-  }
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-[#f0f2f4]">
@@ -54,8 +54,8 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentRoute = 'home' }) =>
             <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors cursor-pointer" onClick={(e) => handleLinkClick(e, '#blog')} href="#blog">コラム</a>
             <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors cursor-pointer" onClick={(e) => handleLinkClick(e, '#content')} href="#content">メディア</a>
             <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors cursor-pointer" onClick={(e) => handleLinkClick(e, '#about')} href="#about">プロフィール</a>
-            <button 
-              onClick={(e) => handleLinkClick(e as any, '#contact')}
+            <button
+              onClick={(e) => handleLinkClick(e, '#contact')}
               className="bg-primary hover:bg-blue-600 text-white text-sm font-bold py-2.5 px-5 rounded-lg transition-all shadow-sm shadow-blue-200"
             >
               無料相談を予約
@@ -81,8 +81,8 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentRoute = 'home' }) =>
             <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors" href="#blog" onClick={(e) => handleLinkClick(e, '#blog')}>コラム</a>
             <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors" href="#content" onClick={(e) => handleLinkClick(e, '#content')}>メディア</a>
             <a className="text-sm font-medium text-gray-700 hover:text-primary transition-colors" href="#about" onClick={(e) => handleLinkClick(e, '#about')}>プロフィール</a>
-             <button 
-              onClick={(e) => handleLinkClick(e as any, '#contact')}
+            <button
+              onClick={(e) => handleLinkClick(e, '#contact')}
               className="bg-primary hover:bg-blue-600 text-white text-sm font-bold py-3 px-5 rounded-lg transition-all w-full text-center"
             >
               無料相談を予約
