@@ -139,13 +139,17 @@ async function postToMicroCMS(
 function buildBlogPayload(
   frontmatter: Record<string, unknown>,
   htmlBody: string,
+  isDraft: boolean,
 ): Record<string, unknown> {
   const payload: Record<string, unknown> = {
     title: frontmatter.title,
-    publishedAt: frontmatter.publishedAt,
     // ブログテンプレートは content、マイグレーションプラン準拠は body
     content: htmlBody,
   };
+  // publishedAt は公開時のみ有効。下書きの場合は送信しない（microCMS API の仕様）
+  if (!isDraft && frontmatter.publishedAt) {
+    payload.publishedAt = frontmatter.publishedAt;
+  }
   // category: テンプレートがコンテンツ参照（カテゴリAPI）の場合は送信しない。管理画面で手動設定
   return payload;
 }
@@ -212,7 +216,7 @@ async function main() {
   // ペイロード構築
   const payload =
     contentType === 'blog'
-      ? buildBlogPayload(frontmatter, htmlBody)
+      ? buildBlogPayload(frontmatter, htmlBody, isDraft)
       : buildEventPayload(frontmatter, htmlBody);
 
   // 投稿
