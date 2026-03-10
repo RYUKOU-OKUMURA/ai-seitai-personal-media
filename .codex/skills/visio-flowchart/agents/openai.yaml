@@ -1,0 +1,4 @@
+interface:
+  display_name: "Visio Flowchart"
+  short_description: "Mermaidから業務フロー図を作成"
+  default_prompt: "Use $visio-flowchart to turn this process description or Mermaid draft into a clean flowchart for this repository."

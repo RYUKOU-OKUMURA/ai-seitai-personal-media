@@ -1,0 +1,4 @@
+interface:
+  display_name: "New Event"
+  short_description: "イベント記事を作成して投稿準備"
+  default_prompt: "Use $new-event to draft an event post in this repository and prepare it for microCMS posting."

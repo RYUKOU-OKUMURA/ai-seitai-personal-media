@@ -1,0 +1,4 @@
+interface:
+  display_name: "New Blog"
+  short_description: "ブログ記事を作成して投稿準備"
+  default_prompt: "Use $new-blog to draft a blog post in this repository and prepare it for microCMS posting."
