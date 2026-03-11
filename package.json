@@ -11,8 +11,12 @@
     "astro": "astro",
     "typecheck": "tsc --noEmit",
     "test:security": "node --test --experimental-strip-types tests/security.test.ts",
-    "test": "npm run typecheck && npm run test:security",
-    "cms:post": "tsx scripts/post-to-microcms.ts"
+    "test:blog-automation": "node --test --experimental-strip-types tests/blog-automation.test.ts",
+    "test": "npm run typecheck && npm run test:security && npm run test:blog-automation",
+    "cms:post": "node --import tsx scripts/post-to-microcms.ts",
+    "blog:context": "node --import tsx scripts/prepare-daily-blog-context.ts",
+    "blog:slack": "node --import tsx scripts/post-blog-to-slack.ts",
+    "blog:slack:dry-run": "node --import tsx scripts/post-blog-to-slack.ts --dry-run"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",

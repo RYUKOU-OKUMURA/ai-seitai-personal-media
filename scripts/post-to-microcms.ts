@@ -21,40 +21,45 @@
 
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { config } from 'dotenv';
+import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
 import { marked } from 'marked';
+import { loadProjectEnv, relativeToProject } from './blog-automation-common.ts';
 
-// .env.local から環境変数を読み込み
-config({ path: resolve(process.cwd(), '.env.local') });
+export type ContentType = 'blog' | 'events';
 
-const MICROCMS_SERVICE_DOMAIN = process.env.MICROCMS_SERVICE_DOMAIN;
-const MICROCMS_API_KEY = process.env.MICROCMS_API_KEY;
+export interface MicroCmsConfig {
+  serviceDomain: string;
+  apiKey: string;
+}
+
+export interface PostMarkdownOptions {
+  forceDraft?: boolean;
+  serviceDomain?: string;
+  apiKey?: string;
+}
+
+export interface PostResult {
+  id: string;
+}
+
+export interface PostMarkdownFileResult {
+  absolutePath: string;
+  relativePath: string;
+  contentId?: string;
+  contentType: ContentType;
+  endpoint: string;
+  id: string;
+  isDraft: boolean;
+  managementUrl: string;
+  payload: Record<string, unknown>;
+  title: string;
+}
 
 // ---------------------------------------------------------------------------
 // CLI 引数パース
 // ---------------------------------------------------------------------------
-const filePath = process.argv[2];
-
-if (!filePath) {
-  console.error('使い方: npm run cms:post -- <Markdownファイルパス>');
-  console.error('例:     npm run cms:post -- src/content/blog/記事名.md');
-  process.exit(1);
-}
-
-if (!MICROCMS_SERVICE_DOMAIN || !MICROCMS_API_KEY) {
-  console.error('環境変数が設定されていません。.env.local に以下を追加してください:');
-  console.error('  MICROCMS_SERVICE_DOMAIN=your-service-domain');
-  console.error('  MICROCMS_API_KEY=your-api-key');
-  process.exit(1);
-}
-
-// ---------------------------------------------------------------------------
-// コンテンツタイプ判定
-// ---------------------------------------------------------------------------
-type ContentType = 'blog' | 'events';
-
-function detectContentType(path: string): ContentType {
+export function detectContentType(path: string): ContentType {
   if (path.includes('/content/blog/') || path.includes('content/blog/')) return 'blog';
   if (path.includes('/content/events/') || path.includes('content/events/')) return 'events';
   throw new Error(
@@ -66,7 +71,7 @@ function detectContentType(path: string): ContentType {
 // ---------------------------------------------------------------------------
 // Markdown → HTML 変換
 // ---------------------------------------------------------------------------
-async function markdownToHtml(md: string): Promise<string> {
+export async function markdownToHtml(md: string): Promise<string> {
   return await marked(md, {
     breaks: false,
     gfm: true,
@@ -76,21 +81,37 @@ async function markdownToHtml(md: string): Promise<string> {
 // ---------------------------------------------------------------------------
 // microCMS API 呼び出し
 // ---------------------------------------------------------------------------
-interface PostResult {
-  id: string;
+function resolveMicroCmsConfig(overrides: PostMarkdownOptions = {}): MicroCmsConfig {
+  loadProjectEnv();
+  const serviceDomain = overrides.serviceDomain ?? process.env.MICROCMS_SERVICE_DOMAIN;
+  const apiKey = overrides.apiKey ?? process.env.MICROCMS_API_KEY;
+
+  if (!serviceDomain || !apiKey) {
+    throw new Error(
+      '環境変数が設定されていません。.env.local に MICROCMS_SERVICE_DOMAIN と MICROCMS_API_KEY を追加してください。',
+    );
+  }
+
+  return { serviceDomain, apiKey };
 }
 
-async function postToMicroCMS(
+export function buildManagementUrl(serviceDomain: string, endpoint: string, id: string): string {
+  return `https://${serviceDomain}.microcms.io/apis/${endpoint}/content/${id}`;
+}
+
+export async function postToMicroCMS(
   endpoint: string,
   payload: Record<string, unknown>,
   contentId?: string,
   isDraft?: boolean,
+  config?: MicroCmsConfig,
 ): Promise<PostResult> {
-  const baseUrl = `https://${MICROCMS_SERVICE_DOMAIN}.microcms.io/api/v1/${endpoint}`;
+  const microCmsConfig = config ?? resolveMicroCmsConfig();
+  const baseUrl = `https://${microCmsConfig.serviceDomain}.microcms.io/api/v1/${endpoint}`;
   const draftQuery = isDraft ? '?status=draft' : '';
 
   const headers = {
-    'X-MICROCMS-API-KEY': MICROCMS_API_KEY!,
+    'X-MICROCMS-API-KEY': microCmsConfig.apiKey,
     'Content-Type': 'application/json',
   };
 
@@ -192,7 +213,11 @@ function buildEventPayload(
 // ---------------------------------------------------------------------------
 // メイン処理
 // ---------------------------------------------------------------------------
-async function main() {
+export async function postMarkdownFileToMicroCMS(
+  filePath: string,
+  options: PostMarkdownOptions = {},
+): Promise<PostMarkdownFileResult> {
+  const microCmsConfig = resolveMicroCmsConfig(options);
   const absolutePath = resolve(process.cwd(), filePath);
   const raw = readFileSync(absolutePath, 'utf-8');
   const { data: frontmatter, content: markdownBody } = matter(raw);
@@ -200,7 +225,45 @@ async function main() {
   const contentType = detectContentType(filePath);
   const endpoint = contentType === 'blog' ? 'blogs' : 'event';
   const contentId = (frontmatter.slug as string) || undefined;
-  // デフォルトは下書き。公開する場合は frontmatter で draft: false を明示
+  const isDraft = options.forceDraft === true ? true : frontmatter.draft !== false;
+
+  const htmlBody = await markdownToHtml(markdownBody);
+  const payload =
+    contentType === 'blog'
+      ? buildBlogPayload(frontmatter, htmlBody, isDraft)
+      : buildEventPayload(frontmatter, htmlBody);
+
+  const result = await postToMicroCMS(endpoint, payload, contentId, isDraft, microCmsConfig);
+
+  return {
+    absolutePath,
+    relativePath: relativeToProject(absolutePath),
+    contentId,
+    contentType,
+    endpoint,
+    id: result.id,
+    isDraft,
+    managementUrl: buildManagementUrl(microCmsConfig.serviceDomain, endpoint, result.id),
+    payload,
+    title: String(frontmatter.title ?? ''),
+  };
+}
+
+async function main() {
+  const filePath = process.argv[2];
+
+  if (!filePath) {
+    console.error('使い方: npm run cms:post -- <Markdownファイルパス>');
+    console.error('例:     npm run cms:post -- src/content/blog/記事名.md');
+    process.exit(1);
+  }
+
+  const absolutePath = resolve(process.cwd(), filePath);
+  const raw = readFileSync(absolutePath, 'utf-8');
+  const { data: frontmatter } = matter(raw);
+  const contentType = detectContentType(filePath);
+  const endpoint = contentType === 'blog' ? 'blogs' : 'event';
+  const contentId = (frontmatter.slug as string) || undefined;
   const isDraft = frontmatter.draft !== false;
 
   console.log(`\n--- microCMS 投稿 ---`);
@@ -212,20 +275,10 @@ async function main() {
   console.log(`タイトル:     ${frontmatter.title}`);
   console.log('');
 
-  // Markdown → HTML
-  const htmlBody = await markdownToHtml(markdownBody);
+  const result = await postMarkdownFileToMicroCMS(filePath);
 
-  // ペイロード構築
-  const payload =
-    contentType === 'blog'
-      ? buildBlogPayload(frontmatter, htmlBody, isDraft)
-      : buildEventPayload(frontmatter, htmlBody);
-
-  // 投稿
-  const result = await postToMicroCMS(endpoint, payload, contentId, isDraft);
-
-  console.log(`投稿完了: ${endpoint}/${result.id}`);
-  console.log(`管理画面: https://${MICROCMS_SERVICE_DOMAIN}.microcms.io/apis/${endpoint}/content/${result.id}`);
+  console.log(`投稿完了: ${result.endpoint}/${result.id}`);
+  console.log(`管理画面: ${result.managementUrl}`);
   console.log('');
 
   if (!frontmatter.slug) {
@@ -233,7 +286,9 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error('エラー:', err instanceof Error ? err.message : err);
-  process.exit(1);
-});
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  main().catch((err) => {
+    console.error('エラー:', err instanceof Error ? err.message : err);
+    process.exit(1);
+  });
+}
