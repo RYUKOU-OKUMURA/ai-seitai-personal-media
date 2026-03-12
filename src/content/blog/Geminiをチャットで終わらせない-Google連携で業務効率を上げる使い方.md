@@ -3,7 +3,7 @@ title: "Geminiをチャットで終わらせない——Google連携で業務効
 slug: "gemini-google-workflow-efficiency"
 publishedAt: "2026-03-12T00:00:00.000Z"
 category: "実践ノウハウ"
-image: ""
+image: "/images/blog/gemini-google-workflow-efficiency-eyecatch.png"
 excerpt: "Geminiを単なる会話AIとして使うだけでは、業務効率化の本番は始まりません。Google連携を前提に、判断の負荷を減らしながら実務を回すための使い分けを整理します。"
 draft: true
 ---
