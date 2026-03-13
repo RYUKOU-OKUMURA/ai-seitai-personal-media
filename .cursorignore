@@ -1,0 +1,22 @@
+# Build artifacts and package installs
+node_modules/
+dist/
+dist-ssr/
+.astro/
+.vercel/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Local automation temp/state
+automation/.tmp/
+automation/.state/
+
+# Obsidian-derived source cache/content
+sources/
