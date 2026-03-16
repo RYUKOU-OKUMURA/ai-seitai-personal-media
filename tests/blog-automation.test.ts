@@ -8,6 +8,7 @@ import {
   prepareDailyBlogContext,
   type BlogAutomationHistoryEntry,
 } from '../scripts/prepare-daily-blog-context.ts';
+import { formatNetworkFailure, resolveSlackChannelId, resolveSlackWebhookUrl, sendSlackMessage } from '../scripts/blog-automation-common.ts';
 import { postMarkdownFileToMicroCMS } from '../scripts/post-to-microcms.ts';
 import { publishBlogToSlack, publishSkipToSlack } from '../scripts/post-blog-to-slack.ts';
 
@@ -275,4 +276,92 @@ draft: true
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test('resolveSlackWebhookUrl falls back to shared env candidates when .env.local does not define it', () => {
+  const root = mkdtempSync(join(tmpdir(), 'blog-webhook-env-'));
+  const firstEnv = join(root, 'SNSAutomation.env');
+  const secondEnv = join(root, 'SnapLog.env');
+  const originalWebhook = process.env.SLACK_WEBHOOK_URL;
+
+  delete process.env.SLACK_WEBHOOK_URL;
+  writeFileSync(firstEnv, 'OTHER_KEY=1\n', 'utf8');
+  writeFileSync(secondEnv, 'SLACK_WEBHOOK_URL=https://example.com/services/test\n', 'utf8');
+
+  try {
+    const webhookUrl = resolveSlackWebhookUrl([firstEnv, secondEnv]);
+    assert.equal(webhookUrl, 'https://example.com/services/test');
+  } finally {
+    if (originalWebhook === undefined) {
+      delete process.env.SLACK_WEBHOOK_URL;
+    } else {
+      process.env.SLACK_WEBHOOK_URL = originalWebhook;
+    }
+  }
+});
+
+test('resolveSlackChannelId prefers blog-specific channel and falls back to shared env files', () => {
+  const root = mkdtempSync(join(tmpdir(), 'blog-channel-env-'));
+  const sharedEnv = join(root, 'shared.env');
+  const originalBlogChannel = process.env.BLOG_SLACK_CHANNEL_ID;
+  const originalChannel = process.env.SLACK_CHANNEL_ID;
+
+  delete process.env.BLOG_SLACK_CHANNEL_ID;
+  delete process.env.SLACK_CHANNEL_ID;
+  writeFileSync(sharedEnv, 'BLOG_SLACK_CHANNEL_ID=C0AKW720M37\n', 'utf8');
+
+  try {
+    assert.equal(resolveSlackChannelId([sharedEnv]), 'C0AKW720M37');
+    delete process.env.BLOG_SLACK_CHANNEL_ID;
+    process.env.SLACK_CHANNEL_ID = 'CLEGACY123';
+    assert.equal(resolveSlackChannelId([sharedEnv]), 'CLEGACY123');
+    process.env.BLOG_SLACK_CHANNEL_ID = 'CBLOG123';
+    assert.equal(resolveSlackChannelId([sharedEnv]), 'CBLOG123');
+  } finally {
+    if (originalBlogChannel === undefined) {
+      delete process.env.BLOG_SLACK_CHANNEL_ID;
+    } else {
+      process.env.BLOG_SLACK_CHANNEL_ID = originalBlogChannel;
+    }
+    if (originalChannel === undefined) {
+      delete process.env.SLACK_CHANNEL_ID;
+    } else {
+      process.env.SLACK_CHANNEL_ID = originalChannel;
+    }
+  }
+});
+
+test('sendSlackMessage includes channel override when provided', async () => {
+  const originalFetch = globalThis.fetch;
+  let parsedBody: Record<string, unknown> | undefined;
+
+  globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+    parsedBody = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>;
+    return new Response('ok', { status: 200 });
+  }) as typeof fetch;
+
+  try {
+    await sendSlackMessage('https://example.com/services/test', 'hello', 'C0AKW720M37');
+    assert.deepEqual(parsedBody, {
+      text: 'hello',
+      channel: 'C0AKW720M37',
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('formatNetworkFailure includes sandbox guidance for DNS lookup errors', () => {
+  const error = new TypeError('fetch failed', {
+    cause: Object.assign(new Error('getaddrinfo ENOTFOUND ai-seitai-dx.microcms.io'), {
+      code: 'ENOTFOUND',
+      syscall: 'getaddrinfo',
+      hostname: 'ai-seitai-dx.microcms.io',
+    }),
+  });
+
+  const message = formatNetworkFailure('microCMS API request failed for blogs', error);
+  assert.match(message, /ENOTFOUND/);
+  assert.match(message, /sandboxed network restrictions/);
+  assert.match(message, /rerun the delivery command with escalated permissions/);
 });

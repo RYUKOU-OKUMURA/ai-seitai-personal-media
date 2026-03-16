@@ -24,7 +24,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
 import { marked } from 'marked';
-import { loadProjectEnv, relativeToProject } from './blog-automation-common.ts';
+import { formatNetworkFailure, loadProjectEnv, relativeToProject } from './blog-automation-common.ts';
 
 export type ContentType = 'blog' | 'events';
 
@@ -116,31 +116,35 @@ export async function postToMicroCMS(
   };
 
   let response: Response;
-  if (contentId) {
-    response = await fetch(`${baseUrl}/${contentId}${draftQuery}`, {
-      method: 'PATCH',
-      headers,
-      body: JSON.stringify(payload),
-    });
-    // 404 または 400 "Content is not exists" の場合は新規作成として PUT を試行
-    if (!response.ok) {
-      const errorBody = await response.text();
-      if (response.status === 404 || (response.status === 400 && errorBody.includes('Content is not exists'))) {
-        response = await fetch(`${baseUrl}/${contentId}${draftQuery}`, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify(payload),
-        });
-      } else {
-        throw new Error(`microCMS API エラー (${response.status}): ${errorBody}`);
+  try {
+    if (contentId) {
+      response = await fetch(`${baseUrl}/${contentId}${draftQuery}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify(payload),
+      });
+      // 404 または 400 "Content is not exists" の場合は新規作成として PUT を試行
+      if (!response.ok) {
+        const errorBody = await response.text();
+        if (response.status === 404 || (response.status === 400 && errorBody.includes('Content is not exists'))) {
+          response = await fetch(`${baseUrl}/${contentId}${draftQuery}`, {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify(payload),
+          });
+        } else {
+          throw new Error(`microCMS API エラー (${response.status}): ${errorBody}`);
+        }
       }
+    } else {
+      response = await fetch(`${baseUrl}${draftQuery}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      });
     }
-  } else {
-    response = await fetch(`${baseUrl}${draftQuery}`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-    });
+  } catch (error) {
+    throw new Error(formatNetworkFailure(`microCMS API request failed for ${endpoint}`, error));
   }
 
   if (!response.ok) {

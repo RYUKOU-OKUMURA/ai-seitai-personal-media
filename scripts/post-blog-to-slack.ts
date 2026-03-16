@@ -7,6 +7,7 @@ import {
   readJsonFile,
   readMarkdownDocument,
   relativeToProject,
+  resolveSlackChannelId,
   resolveSlackWebhookUrl,
   sendSlackMessage,
   sha256,
@@ -63,7 +64,7 @@ export interface PublishSkipOptions {
 }
 
 interface PublishDependencies {
-  sendSlack?: (webhookUrl: string, message: string) => Promise<void>;
+  sendSlack?: (webhookUrl: string, message: string, channelId?: string | null) => Promise<void>;
   postToMicroCMS?: (blogPath: string, options: { forceDraft: boolean }) => Promise<PostMarkdownFileResult>;
 }
 
@@ -176,20 +177,28 @@ function assertMessageLength(message: string): void {
   }
 }
 
-function resolveWebhookUrl(providedWebhookUrl?: string | null, dryRun?: boolean): string {
+function resolveSlackTarget(
+  providedWebhookUrl?: string | null,
+  providedChannelId?: string | null,
+  dryRun?: boolean,
+): { webhookUrl: string; channelId: string | null } {
+  const channelId = providedChannelId ?? resolveSlackChannelId();
+
   if (dryRun) {
-    return providedWebhookUrl ?? 'dry-run';
+    return { webhookUrl: providedWebhookUrl ?? 'dry-run', channelId };
   }
 
   if (providedWebhookUrl) {
-    return providedWebhookUrl;
+    return { webhookUrl: providedWebhookUrl, channelId };
   }
 
   const webhookUrl = resolveSlackWebhookUrl();
   if (!webhookUrl) {
-    throw new Error('SLACK_WEBHOOK_URL is not set. Add it to .env.local or the environment.');
+    throw new Error(
+      'SLACK_WEBHOOK_URL is not set. Add BLOG_SLACK_WEBHOOK_URL or SLACK_WEBHOOK_URL to .env.local, the environment, SNSAutomation/.env, or SnapLog/.env.',
+    );
   }
-  return webhookUrl;
+  return { webhookUrl, channelId };
 }
 
 export async function publishBlogToSlack(
@@ -239,10 +248,10 @@ export async function publishBlogToSlack(
     };
   }
 
-  const webhookUrl = dependencies.sendSlack
-    ? options.webhookUrl ?? 'injected-webhook'
-    : resolveWebhookUrl(options.webhookUrl, options.dryRun);
-  await sendSlack(webhookUrl, message);
+  const slackTarget = dependencies.sendSlack
+    ? { webhookUrl: options.webhookUrl ?? 'injected-webhook', channelId: resolveSlackChannelId() }
+    : resolveSlackTarget(options.webhookUrl, undefined, options.dryRun);
+  await sendSlack(slackTarget.webhookUrl, message, slackTarget.channelId);
 
   history.push({
     date: options.reportDate,
@@ -294,10 +303,10 @@ export async function publishSkipToSlack(
     };
   }
 
-  const webhookUrl = dependencies.sendSlack
-    ? options.webhookUrl ?? 'injected-webhook'
-    : resolveWebhookUrl(options.webhookUrl, options.dryRun);
-  await sendSlack(webhookUrl, message);
+  const slackTarget = dependencies.sendSlack
+    ? { webhookUrl: options.webhookUrl ?? 'injected-webhook', channelId: resolveSlackChannelId() }
+    : resolveSlackTarget(options.webhookUrl, undefined, options.dryRun);
+  await sendSlack(slackTarget.webhookUrl, message, slackTarget.channelId);
 
   history.push({
     date: options.reportDate,

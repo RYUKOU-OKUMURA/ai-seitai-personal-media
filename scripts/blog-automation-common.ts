@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, statSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { dirname, extname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config } from 'dotenv';
@@ -12,6 +13,12 @@ export const AUTOMATION_ROOT = resolve(PROJECT_ROOT, 'automation');
 export const AUTOMATION_TMP_DIR = resolve(AUTOMATION_ROOT, '.tmp');
 export const AUTOMATION_STATE_DIR = resolve(AUTOMATION_ROOT, '.state');
 export const SOURCES_ROOT = resolve(PROJECT_ROOT, 'sources');
+export const DEFAULT_SHARED_SLACK_ENV_PATHS = [
+  resolve(homedir(), 'マイドライブ（okumura@physical-balance-lab.net）', 'Obsidian Vault', 'SNSAutomation', '.env'),
+  resolve(homedir(), 'マイドライブ（okumura@physical-balance-lab.net）', 'Obsidian Vault', 'SnapLog', '.env'),
+];
+const BLOG_SLACK_WEBHOOK_ENV_KEYS = ['BLOG_SLACK_WEBHOOK_URL', 'SLACK_WEBHOOK_URL'] as const;
+const BLOG_SLACK_CHANNEL_ENV_KEYS = ['BLOG_SLACK_CHANNEL_ID', 'SLACK_CHANNEL_ID'] as const;
 
 let projectEnvLoaded = false;
 
@@ -30,10 +37,81 @@ export function loadProjectEnv(): void {
   projectEnvLoaded = true;
 }
 
-export function resolveSlackWebhookUrl(): string | null {
+export function loadEnvFile(envPath: string): void {
+  if (!existsSync(envPath)) {
+    return;
+  }
+
+  for (const rawLine of readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) {
+      continue;
+    }
+
+    const normalized = line.startsWith('export ') ? line.slice(7).trim() : line;
+    const separatorIndex = normalized.indexOf('=');
+    if (separatorIndex <= 0) {
+      continue;
+    }
+
+    const key = normalized.slice(0, separatorIndex).trim();
+    const value = normalized
+      .slice(separatorIndex + 1)
+      .trim()
+      .replace(/^['"]|['"]$/g, '');
+    if (key && !process.env[key]) {
+      process.env[key] = value;
+    }
+  }
+}
+
+function resolveFirstEnvValue(keys: readonly string[]): string | null {
+  for (const key of keys) {
+    const value = process.env[key]?.trim();
+    if (value) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+export function resolveSlackWebhookUrl(searchPaths: string[] = DEFAULT_SHARED_SLACK_ENV_PATHS): string | null {
   loadProjectEnv();
-  const webhookUrl = process.env.SLACK_WEBHOOK_URL?.trim();
-  return webhookUrl ? webhookUrl : null;
+
+  const existingWebhookUrl = resolveFirstEnvValue(BLOG_SLACK_WEBHOOK_ENV_KEYS);
+  if (existingWebhookUrl) {
+    return existingWebhookUrl;
+  }
+
+  for (const envPath of searchPaths) {
+    loadEnvFile(envPath);
+    const webhookUrl = resolveFirstEnvValue(BLOG_SLACK_WEBHOOK_ENV_KEYS);
+    if (webhookUrl) {
+      return webhookUrl;
+    }
+  }
+
+  return null;
+}
+
+export function resolveSlackChannelId(searchPaths: string[] = DEFAULT_SHARED_SLACK_ENV_PATHS): string | null {
+  loadProjectEnv();
+
+  const existingChannelId = resolveFirstEnvValue(BLOG_SLACK_CHANNEL_ENV_KEYS);
+  if (existingChannelId) {
+    return existingChannelId;
+  }
+
+  for (const envPath of searchPaths) {
+    loadEnvFile(envPath);
+    const channelId = resolveFirstEnvValue(BLOG_SLACK_CHANNEL_ENV_KEYS);
+    if (channelId) {
+      return channelId;
+    }
+  }
+
+  return null;
 }
 
 export function ensureParentDir(filePath: string): void {
@@ -208,14 +286,71 @@ export function sha256(text: string): string {
   return createHash('sha256').update(text, 'utf8').digest('hex');
 }
 
-export async function sendSlackMessage(webhookUrl: string, message: string): Promise<void> {
-  const response = await fetch(webhookUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-    },
-    body: JSON.stringify({ text: message }),
-  });
+function buildErrorParts(error: unknown): string[] {
+  if (!(error instanceof Error)) {
+    return [String(error)];
+  }
+
+  const parts = [error.message];
+  const { cause } = error;
+  if (!cause) {
+    return parts;
+  }
+
+  if (cause instanceof Error) {
+    if (cause.message && cause.message !== error.message) {
+      parts.push(cause.message);
+    }
+    const causeRecord = cause as Error & {
+      code?: string;
+      syscall?: string;
+      hostname?: string;
+    };
+    const metadata = [causeRecord.code, causeRecord.syscall, causeRecord.hostname].filter(Boolean).join(' ');
+    if (metadata) {
+      parts.push(metadata);
+    }
+    return parts;
+  }
+
+  if (typeof cause === 'string' && cause !== error.message) {
+    parts.push(cause);
+  }
+
+  return parts;
+}
+
+export function formatNetworkFailure(target: string, error: unknown): string {
+  const details = buildErrorParts(error).filter(Boolean).join(' | ');
+  const dnsFailure = /\bENOTFOUND\b|EAI_AGAIN|getaddrinfo|name resolution|nodename nor servname|failed to resolve host/i.test(
+    details,
+  );
+
+  if (!dnsFailure) {
+    return `${target}: ${details}`;
+  }
+
+  return `${target}: ${details}. DNS resolution failed before the request reached the remote service. In Codex automations this often means the command ran inside sandboxed network restrictions, so rerun the delivery command with escalated permissions.`;
+}
+
+export async function sendSlackMessage(webhookUrl: string, message: string, channelId?: string | null): Promise<void> {
+  const payload: Record<string, string> = { text: message };
+  if (channelId) {
+    payload.channel = channelId;
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    throw new Error(formatNetworkFailure('Failed to reach Slack webhook', error));
+  }
 
   const responseText = (await response.text()).trim();
   if (!response.ok) {
